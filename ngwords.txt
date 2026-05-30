@@ -1,0 +1,6 @@
+# NGワード (1行1語, 部分一致・大小無視)。配信規約に応じて追加。
+# ユーザ上書き: ~/bb-analysis/ngwords_user.txt (非コミット)
+死ね
+殺す
+fuck
+shit
