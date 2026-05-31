@@ -20,6 +20,7 @@ uv pip install -e .              # 開発
 - sinks/file.py: file_sink(path) — 実況文を file へ書く Sink (OBS テキストソース用)。
 - sinks/voicevox.py: VoicevoxSink — VOICEVOX HTTP で text→音声 (WAV)。HTTP は stdlib、再生は player 注入で依存ゼロ。
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
+- orchestrator.py: SpeechGate — 発話タイミング制御 (スコア変動 + クールダウン + 重要イベント)。
 - llm.py: OpenAI 互換 client (env COMPANION_LLM_BASE_URL/API_KEY/MODEL、旧 BPB_LLM_* も fallback 可)。
 
 設計の詳細・データフロー・plugin の作り方は [ARCHITECTURE.md](ARCHITECTURE.md) を参照。

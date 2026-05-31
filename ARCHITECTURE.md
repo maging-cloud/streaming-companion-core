@@ -41,6 +41,7 @@ fan_out(text, [sink, ...])   ← text / その他 Sink へ出力
 | `sinks.file` | `file_sink(path, append=False)` — 実況文を file へ書く Sink (OBS テキストソース等のオーバーレイ)。stdlib のみ。 |
 | `sinks.voicevox` | `VoicevoxSink(speaker, base_url, player, save_path)` — VOICEVOX HTTP で text→WAV。HTTP は stdlib、音声再生は `player` callback で注入し依存ゼロを維持。 |
 | `comment` | `comment(...)` オーケストレーション。LLM 生文 or handler.template を取り、NG を末尾常時付与して安全文を返す。 |
+| `orchestrator` | `SpeechGate` — 発話タイミング制御。スコア変動閾値 + クールダウン + 重要イベント/force で「喋るか」を判定。 |
 | `llm` | OpenAI 互換 client (`make_client_from_env`、env `COMPANION_LLM_BASE_URL`/`API_KEY`/`MODEL`)。 |
 
 ## handler 規約 (duck typing)
@@ -144,6 +145,25 @@ fan_out("いい流れなのだ", [overlay, tts])   # text/file/音声へ同時 f
 VOICEVOX エンジンが `http://localhost:50021` で稼働している必要がある (合成 API)。
 音声再生ライブラリは利用側が `player` callback で用意する。将来、同梱再生版が要れば
 optional extra として追加する。
+
+## 発話タイミング制御 (`orchestrator.SpeechGate`)
+
+毎入力で実況すると冗長なため、`SpeechGate` が発話可否を判定する:
+
+```python
+from companion_core.orchestrator import SpeechGate
+
+gate = SpeechGate(min_interval=5.0, score_delta=0.1, important_kinds=("battle_lost",))
+
+if gate.should_speak(score=rec_score, kind=event_kind):
+    text = comment(request, handler, client=client, ngwords=ngwords)
+    fan_out(text, sinks)
+```
+
+- 重要イベント (`important_kinds`) / `force=True` → cooldown 無視で常に発話。
+- それ以外 → スコア変動が `score_delta` 以上 **かつ** 前回発話から `min_interval` 秒経過で発話。
+- 発話した時だけ基準スコア・発話時刻を更新する (黙った呼び出しでは基準を動かさない)。
+- 時刻は `clock` callable で注入でき、テスト可能 (実時間に依存しない)。
 
 ## 設計原則
 
