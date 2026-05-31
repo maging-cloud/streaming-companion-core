@@ -1,7 +1,21 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
 .venv/
+venv/
+env/
 dist/
 build/
+*.egg
 *.egg-info/
 .pytest_cache/
+# secrets
+*.key
+*.pem
+.env
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
