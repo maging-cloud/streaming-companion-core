@@ -89,3 +89,26 @@ class TestNGWordPanel(unittest.TestCase):
         panel._user_list.setCurrentRow(0)
         panel._del_word()
         self.assertNotIn("badword", panel.get_user_words())
+
+
+@unittest.skipUnless(HAS_QT, "PySide6 not installed")
+class TestPluginsPanel(unittest.TestCase):
+    def _make(self, enabled=None, kinds=None):
+        from companion_settings.panels.plugins import PluginsPanel
+        return PluginsPanel(enabled=enabled or [], all_kinds=kinds or [])
+
+    def test_get_config_returns_enabled_list(self):
+        panel = self._make(enabled=["shop"], kinds=["shop", "chat"])
+        cfg = panel.get_config()
+        self.assertIn("shop", cfg["enabled"])
+        self.assertNotIn("chat", cfg["enabled"])
+
+    def test_toggle_enables_kind(self):
+        panel = self._make(enabled=[], kinds=["shop"])
+        panel._set_enabled("shop", True)
+        self.assertIn("shop", panel.get_config()["enabled"])
+
+    def test_toggle_disables_kind(self):
+        panel = self._make(enabled=["shop"], kinds=["shop"])
+        panel._set_enabled("shop", False)
+        self.assertNotIn("shop", panel.get_config()["enabled"])
