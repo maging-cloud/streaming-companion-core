@@ -42,6 +42,9 @@ fan_out(text, [sink, ...])   ← text / その他 Sink へ出力
 | `sinks.voicevox` | `VoicevoxSink(speaker, base_url, player, save_path)` — VOICEVOX HTTP で text→WAV。HTTP は stdlib、音声再生は `player` callback で注入し依存ゼロを維持。 |
 | `comment` | `comment(...)` オーケストレーション。LLM 生文 or handler.template を取り、NG を末尾常時付与して安全文を返す。 |
 | `orchestrator` | `SpeechGate` — 発話タイミング制御。スコア変動閾値 + クールダウン + 重要イベント/force で「喋るか」を判定。 |
+| `chat_handler` | `ChatHandler` — 視聴者コメント返答の汎用 handler 基底 (persona 注入式、キャラ非依存)。 |
+| `sources.chat` | `make_chat_message` / `from_chat` (chat→CommentRequest) / `keyword_matcher` / `ChatRouter` (kind 振り分け)。 |
+| `sources.twitch` | `parse_irc_line` (PRIVMSG/PING) + `TwitchChatSource` (注入行→privmsg、PING 自動 PONG)。実接続 `open_twitch_irc` は network 依存。 |
 | `llm` | OpenAI 互換 client (`make_client_from_env`、env `COMPANION_LLM_BASE_URL`/`API_KEY`/`MODEL`)。 |
 
 ## handler 規約 (duck typing)
@@ -164,6 +167,33 @@ if gate.should_speak(score=rec_score, kind=event_kind):
 - それ以外 → スコア変動が `score_delta` 以上 **かつ** 前回発話から `min_interval` 秒経過で発話。
 - 発話した時だけ基準スコア・発話時刻を更新する (黙った呼び出しでは基準を動かさない)。
 - 時刻は `clock` callable で注入でき、テスト可能 (実時間に依存しない)。
+
+## 入力 source とチャット振り分け (`companion_core.sources`)
+
+sink (出力) と対称に、source は「外部入力 → CommentRequest」を担う。Twitch chat の取り込みは
+ゲーム非依存なため core に属する。「何がゲーム関連か」等の語彙はゲーム固有なので、利用側が
+`keyword_matcher` で `ChatRouter` に**注入**する (core はキャラ・ゲーム語彙を持たない)。
+
+```python
+from companion_core.sources.twitch import TwitchChatSource, open_twitch_irc
+from companion_core.sources.chat import ChatRouter, keyword_matcher, from_chat
+from companion_core.registry import get_handler
+from companion_core.comment import comment
+
+# ゲーム関連語 (アプリ注入) → kind を振り分け
+router = ChatRouter(rules=[(keyword_matcher(["買", "build", "シナジー"]), "chat_game")],
+                    default_kind="chat")
+
+recv, send = open_twitch_irc(token, nick, "#channel")   # network 依存
+for msg in TwitchChatSource(recv, send=send).messages():
+    kind = router.route(msg)                              # "chat_game" or "chat"
+    req = from_chat(msg["user"], msg["text"], kind=kind)
+    text = comment(req, get_handler(kind), client=client, ngwords=ngwords)
+    fan_out(text, sinks)
+```
+
+`ChatHandler` 基底は persona 注入式で、ゲーム/キャラ固有 handler はこれを継承し persona/template を
+与える (entry-point group `companion_core.handlers` に kind="chat" / "chat_game" 等で登録)。
 
 ## 設計原則
 
