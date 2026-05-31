@@ -18,7 +18,7 @@ uv pip install -e .              # 開発
 - ngword.py: NGワード管理 (load_ngwords/contains_ng/default_paths)、`--list`。seed は同梱 ngwords.txt。
 - sink.py: 出力 Sink (text 既定) + fan_out。
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
-- llm.py: OpenAI 互換 client (env BPB_LLM_BASE_URL/API_KEY/MODEL)。
+- llm.py: OpenAI 互換 client (env COMPANION_LLM_BASE_URL/API_KEY/MODEL、旧 BPB_LLM_* も fallback 可)。
 
 ## plugin 規約 (handler, duck typing)
 persona: str / fewshot: str (空可) / build_user(payload) -> str / template(request) -> str
