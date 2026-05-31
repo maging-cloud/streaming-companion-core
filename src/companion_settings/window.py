@@ -53,21 +53,21 @@ class MainWindow(QMainWindow):
 
         # プラグインパネル（有効なもののみ）
         enabled_set = set(plugin_cfg.get("enabled", []))
-        self._panel_widgets: dict[str, object] = {}
+        self._panel_getters: dict[str, callable] = {}
         for panel in self._extra_panels:
             if panel.section_id not in enabled_set:
                 continue
             panel_cfg = self._cfg.get(panel.section_id, {})
             if hasattr(panel, "build_widget"):
                 widget = panel.build_widget(panel_cfg)
-                panel._get_config = panel.get_config
+                getter = panel.get_config
             else:
                 widget, get_values, set_values = build_form(panel.schema)
                 set_values(panel_cfg)
-                panel._get_config = get_values
+                getter = get_values
             tab_label = f"{getattr(panel, 'icon', '')} {panel.label}".strip()
             self._tabs.addTab(widget, tab_label)
-            self._panel_widgets[panel.section_id] = panel
+            self._panel_getters[panel.section_id] = getter
 
         root.addWidget(self._tabs)
 
@@ -84,8 +84,8 @@ class MainWindow(QMainWindow):
         new_cfg["plugins"] = self._plugins.get_config()
         self._ngword.save_and_get_config()
 
-        for sid, panel in self._panel_widgets.items():
-            new_cfg[sid] = panel._get_config()
+        for sid, getter in self._panel_getters.items():
+            new_cfg[sid] = getter()
 
         config.save(new_cfg)
         QMessageBox.information(
