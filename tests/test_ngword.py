@@ -1,5 +1,6 @@
-import os, tempfile, unittest
-from companion_core.ngword import load_ngwords, contains_ng
+import os, sys, tempfile, unittest
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from ngword import load_ngwords, contains_ng
 
 
 class TestContainsNg(unittest.TestCase):
@@ -20,8 +21,10 @@ class TestLoadNgwords(unittest.TestCase):
     def test_merge_dedup_skip_comments(self):
         d = tempfile.mkdtemp()
         a = os.path.join(d, "a.txt"); b = os.path.join(d, "b.txt")
-        open(a, "w", encoding="utf-8").write("# comment\n死ね\nfuck\n\n")
-        open(b, "w", encoding="utf-8").write("FUCK\n殺す\n")   # FUCK は重複(小文字化)
+        with open(a, "w", encoding="utf-8") as fh:
+            fh.write("# comment\n死ね\nfuck\n\n")
+        with open(b, "w", encoding="utf-8") as fh:
+            fh.write("FUCK\n殺す\n")   # FUCK は重複(小文字化)
         words = load_ngwords([a, b, "/no/such/file"])
         self.assertEqual(words, ["死ね", "fuck", "殺す"])      # 順序保持・重複除去・小文字
 
