@@ -1,7 +1,9 @@
-import os, unittest
+import os
+import unittest
 
-CORE_DIR = os.path.dirname(os.path.abspath(__file__))
-# core が import してはいけない BPB 固有モジュール/シンボル
+PKG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                       "src", "companion_core")
+# companion_core が import してはいけない外部 (BPB 固有) シンボル
 FORBIDDEN = ("commenter", "scorer", "evaluator", "tools",
              "llm_match", "shop_handler", "recommendation")
 
@@ -9,10 +11,10 @@ FORBIDDEN = ("commenter", "scorer", "evaluator", "tools",
 class TestCoreBoundary(unittest.TestCase):
     def test_no_bpb_imports(self):
         offenders = []
-        for fn in sorted(os.listdir(CORE_DIR)):
-            if not fn.endswith(".py") or fn.startswith("test_"):
+        for fn in sorted(os.listdir(PKG_DIR)):
+            if not fn.endswith(".py"):
                 continue
-            with open(os.path.join(CORE_DIR, fn), encoding="utf-8") as f:
+            with open(os.path.join(PKG_DIR, fn), encoding="utf-8") as f:
                 for i, line in enumerate(f, 1):
                     s = line.strip()
                     if not (s.startswith("import ") or s.startswith("from ")):
@@ -20,7 +22,7 @@ class TestCoreBoundary(unittest.TestCase):
                     for bad in FORBIDDEN:
                         if bad in s:
                             offenders.append(f"{fn}:{i}: {s}")
-        self.assertEqual(offenders, [], "core に BPB 依存 import: " + "; ".join(offenders))
+        self.assertEqual(offenders, [], "companion_core に BPB 依存 import: " + "; ".join(offenders))
 
 
 if __name__ == "__main__":

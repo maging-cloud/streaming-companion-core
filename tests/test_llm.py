@@ -1,6 +1,5 @@
-import os, sys, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from llm import make_client_from_env, OpenAIClient, ENV_BASE, ENV_MODEL, ENV_KEY
+import os, unittest
+from companion_core.llm import make_client_from_env, OpenAIClient, ENV_BASE, ENV_MODEL, ENV_KEY
 
 
 class TestClientFromEnv(unittest.TestCase):

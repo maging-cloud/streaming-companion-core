@@ -1,6 +1,5 @@
-import os, sys, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from prompt import build_prompt
+import unittest
+from companion_core.prompt import build_prompt
 
 
 class FakeHandler:

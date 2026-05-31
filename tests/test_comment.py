@@ -1,6 +1,5 @@
-import os, sys, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from comment import comment
+import unittest
+from companion_core.comment import comment
 
 
 class FakeHandler:

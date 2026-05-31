@@ -1,6 +1,5 @@
-import os, sys, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sink import text_sink, get_sink, fan_out
+import unittest
+from companion_core.sink import text_sink, get_sink, fan_out
 
 
 class TestSink(unittest.TestCase):

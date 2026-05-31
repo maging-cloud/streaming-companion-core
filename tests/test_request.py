@@ -1,6 +1,5 @@
-import os, sys, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from request import make_request
+import unittest
+from companion_core.request import make_request
 
 
 class TestMakeRequest(unittest.TestCase):

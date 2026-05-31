@@ -1,6 +1,5 @@
-import os, sys, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from processor import sanitize, make_ng_filter, run_pipeline, SAFE_GENERIC
+import unittest
+from companion_core.processor import sanitize, make_ng_filter, run_pipeline, SAFE_GENERIC
 
 
 class TestSanitize(unittest.TestCase):
