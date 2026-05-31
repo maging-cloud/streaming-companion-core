@@ -66,3 +66,26 @@ class TestLLMPanel(unittest.TestCase):
         self.assertEqual(cfg["base_url"], "http://x")
         self.assertEqual(cfg["model"], "gpt-4")
         self.assertEqual(cfg["api_key"], "sk")
+
+
+@unittest.skipUnless(HAS_QT, "PySide6 not installed")
+class TestNGWordPanel(unittest.TestCase):
+    def _make(self, user_words=None):
+        from companion_settings.panels.ngword import NGWordPanel
+        return NGWordPanel(user_words=user_words or [])
+
+    def test_add_word(self):
+        panel = self._make()
+        panel._add_word_direct("badword")
+        self.assertIn("badword", panel.get_user_words())
+
+    def test_add_duplicate_ignored(self):
+        panel = self._make(["badword"])
+        panel._add_word_direct("badword")
+        self.assertEqual(panel.get_user_words().count("badword"), 1)
+
+    def test_delete_word(self):
+        panel = self._make(["badword"])
+        panel._user_list.setCurrentRow(0)
+        panel._del_word()
+        self.assertNotIn("badword", panel.get_user_words())
