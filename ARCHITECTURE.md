@@ -42,7 +42,7 @@ fan_out(text, [sink, ...])   ← text / その他 Sink へ出力
 | `sinks.voicevox` | `VoicevoxSink(speaker, base_url, player, save_path)` — VOICEVOX HTTP で text→WAV。HTTP は stdlib、音声再生は `player` callback で注入し依存ゼロを維持。 |
 | `comment` | `comment(...)` オーケストレーション。LLM 生文 or handler.template を取り、NG を末尾常時付与して安全文を返す。 |
 | `orchestrator` | `SpeechGate` — 発話タイミング制御。スコア変動閾値 + クールダウン + 重要イベント/force で「喋るか」を判定。 |
-| `chat_handler` | `ChatHandler` — 視聴者コメント返答の汎用 handler 基底 (persona 注入式、キャラ非依存)。 |
+| `chat_handler` | `ChatHandler` (汎用基底, persona 注入式) + `ZundamonChatHandler` (既定 persona ずんだもん, ゲーム非依存)。 |
 | `sources.chat` | `make_chat_message` / `from_chat` (chat→CommentRequest) / `keyword_matcher` / `ChatRouter` (kind 振り分け)。 |
 | `sources.twitch` | `parse_irc_line` (PRIVMSG/PING) + `TwitchChatSource` (注入行→privmsg、PING 自動 PONG)。実接続 `open_twitch_irc` は network 依存。 |
 | `llm` | OpenAI 互換 client (`make_client_from_env`、env `COMPANION_LLM_BASE_URL`/`API_KEY`/`MODEL`)。 |

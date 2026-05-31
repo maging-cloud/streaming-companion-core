@@ -21,7 +21,7 @@ uv pip install -e .              # 開発
 - sinks/voicevox.py: VoicevoxSink — VOICEVOX HTTP で text→音声 (WAV)。HTTP は stdlib、再生は player 注入で依存ゼロ。
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
 - orchestrator.py: SpeechGate — 発話タイミング制御 (スコア変動 + クールダウン + 重要イベント)。
-- chat_handler.py: ChatHandler — 視聴者コメント返答の汎用 handler 基底 (persona 注入式)。
+- chat_handler.py: ChatHandler (汎用基底, persona 注入式) + ZundamonChatHandler (既定 persona ずんだもん, ゲーム非依存)。
 - sources/chat.py: from_chat (chat→CommentRequest) + ChatRouter (kind 振り分け) + keyword_matcher。
 - sources/twitch.py: Twitch IRC parse + TwitchChatSource (PING 自動 PONG)。実接続 open_twitch_irc は network 依存。
 - llm.py: OpenAI 互換 client (env COMPANION_LLM_BASE_URL/API_KEY/MODEL、旧 BPB_LLM_* も fallback 可)。

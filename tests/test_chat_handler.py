@@ -1,5 +1,5 @@
 import unittest
-from companion_core.chat_handler import ChatHandler
+from companion_core.chat_handler import ChatHandler, ZundamonChatHandler
 
 
 class TestChatHandlerBase(unittest.TestCase):
@@ -33,6 +33,25 @@ class TestChatHandlerBase(unittest.TestCase):
         h = ChatHandler(persona="INJECTED", fewshot="FS")
         self.assertEqual(h.persona, "INJECTED")
         self.assertEqual(h.fewshot, "FS")
+
+
+class TestZundamonChatHandler(unittest.TestCase):
+    def test_is_chat_handler(self):
+        self.assertIsInstance(ZundamonChatHandler(), ChatHandler)
+
+    def test_persona_zundamon(self):
+        self.assertIn("ずんだもん", ZundamonChatHandler.persona)
+        self.assertIn("のだ", ZundamonChatHandler.persona)
+
+    def test_template_ends_zundamon(self):
+        t = ZundamonChatHandler().template({"payload": {"user": "a", "text": "hi"}})
+        self.assertIn("のだ", t)
+
+    def test_persona_is_game_agnostic(self):
+        # core の persona に特定ゲーム名が入っていないこと
+        blob = ZundamonChatHandler.persona + ZundamonChatHandler.fewshot
+        self.assertNotIn("Backpack", blob)
+        self.assertNotIn("BPB", blob)
 
 
 if __name__ == "__main__":
