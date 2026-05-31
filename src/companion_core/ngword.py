@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """NGワード管理 (配信規約順守)。1 行 1 語、部分一致・大小無視。
 
-リスト = 呼び出し側が渡すパス列をマージ。汎用 seed は core/ngwords.txt。
+リスト = 呼び出し側が渡すパス列をマージ。汎用 seed は同梱 ngwords.txt。
 CLI `--list` で現在の NGワードを列挙。
 """
 import os
@@ -34,7 +34,7 @@ def contains_ng(text, ngwords):
 def default_paths():
     import importlib.resources
     seed = importlib.resources.files("companion_core") / "ngwords.txt"
-    user = os.path.expanduser("~/bb-analysis/ngwords_user.txt")
+    user = os.path.expanduser("~/.streaming-companion/ngwords_user.txt")
     return [str(seed), user]
 
 
@@ -47,7 +47,7 @@ def _main():
     if a.list:
         for w in words:
             print(w)
-        print(f"-- {len(words)} 語 (companion_core/ngwords.txt + ~/bb-analysis/ngwords_user.txt)")
+        print(f"-- {len(words)} 語 (companion_core/ngwords.txt + ~/.streaming-companion/ngwords_user.txt)")
     return 0
 
 

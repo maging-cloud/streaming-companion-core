@@ -9,7 +9,7 @@ handler 規約 (duck typing):
 
 
 def build_prompt(request, handler):
-    """CommentRequest + handler → (system, user)。BPB 知識ゼロ。"""
+    """CommentRequest + handler → (system, user)。ゲーム知識ゼロ。"""
     system = handler.persona + ("\n" + handler.fewshot if handler.fewshot else "")
     user = handler.build_user(request.get("payload", {}))
     return system, user
