@@ -16,7 +16,7 @@ uv pip install -e .              # 開発
 - prompt.py: build_prompt(request, handler) — handler.persona/fewshot/build_user から (system,user)。
 - processor.py: sanitize + make_ng_filter + run_pipeline。
 - ngword.py: NGワード管理 (load_ngwords/contains_ng/default_paths)、`--list`。seed は同梱 ngwords.txt。
-- sink.py: 出力 Sink (text 既定) + fan_out。
+- sink.py: 出力 Sink (text 既定) + fan_out。VOICEVOX/OBS 等の追加 Sink もゲーム非依存なため本パッケージに属する (依存が要る場合は optional extra `companion_core.sinks.*` として隔離し、本体の依存ゼロ原則を保つ)。
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
 - llm.py: OpenAI 互換 client (env COMPANION_LLM_BASE_URL/API_KEY/MODEL、旧 BPB_LLM_* も fallback 可)。
 
