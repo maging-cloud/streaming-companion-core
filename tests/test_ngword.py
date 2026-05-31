@@ -1,6 +1,5 @@
-import os, sys, tempfile, unittest
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ngword import load_ngwords, contains_ng
+import os, tempfile, unittest
+from companion_core.ngword import load_ngwords, contains_ng
 
 
 class TestContainsNg(unittest.TestCase):
