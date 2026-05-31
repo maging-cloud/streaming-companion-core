@@ -32,9 +32,10 @@ def contains_ng(text, ngwords):
 
 
 def default_paths():
-    repo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ngwords.txt")
+    import importlib.resources
+    seed = importlib.resources.files("companion_core") / "ngwords.txt"
     user = os.path.expanduser("~/bb-analysis/ngwords_user.txt")
-    return [repo, user]
+    return [str(seed), user]
 
 
 def _main():
@@ -46,7 +47,7 @@ def _main():
     if a.list:
         for w in words:
             print(w)
-        print(f"-- {len(words)} 語 (core/ngwords.txt + ~/bb-analysis/ngwords_user.txt)")
+        print(f"-- {len(words)} 語 (companion_core/ngwords.txt + ~/bb-analysis/ngwords_user.txt)")
     return 0
 
 
