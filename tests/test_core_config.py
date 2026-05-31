@@ -13,18 +13,18 @@ class TestLoadConfig(unittest.TestCase):
         with tempfile.NamedTemporaryFile(suffix=".toml", mode="wb", delete=False) as f:
             f.write(b'[llm]\nbase_url = "http://localhost"\nmodel = "test"\n')
             path = f.name
+        self.addCleanup(pathlib.Path(path).unlink, missing_ok=True)
         cfg = load_config(path)
         self.assertEqual(cfg["llm"]["base_url"], "http://localhost")
         self.assertEqual(cfg["llm"]["model"], "test")
-        pathlib.Path(path).unlink()
 
     def test_loads_plugins_section(self):
         with tempfile.NamedTemporaryFile(suffix=".toml", mode="wb", delete=False) as f:
             f.write(b'[plugins]\nenabled = ["shop", "chat"]\n')
             path = f.name
+        self.addCleanup(pathlib.Path(path).unlink, missing_ok=True)
         cfg = load_config(path)
         self.assertEqual(cfg["plugins"]["enabled"], ["shop", "chat"])
-        pathlib.Path(path).unlink()
 
 
 class TestMakeClientFromConfig(unittest.TestCase):
