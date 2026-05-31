@@ -2,12 +2,19 @@ import pathlib
 import tempfile
 import unittest
 
+try:
+    import tomli_w  # noqa: F401
+    HAS_TOMLI_W = True
+except ImportError:
+    HAS_TOMLI_W = False
+
 
 class TestSettingsConfig(unittest.TestCase):
     def test_load_missing_returns_empty(self):
         from companion_settings.config import load
         self.assertEqual(load("/nonexistent/config.toml"), {})
 
+    @unittest.skipUnless(HAS_TOMLI_W, "tomli_w not installed")
     def test_save_creates_file(self):
         from companion_settings.config import save
         with tempfile.TemporaryDirectory() as d:
@@ -15,6 +22,7 @@ class TestSettingsConfig(unittest.TestCase):
             save({"llm": {"model": "gpt-4"}}, path)
             self.assertTrue(path.exists())
 
+    @unittest.skipUnless(HAS_TOMLI_W, "tomli_w not installed")
     def test_save_and_load_roundtrip(self):
         from companion_settings.config import load, save
         with tempfile.TemporaryDirectory() as d:
@@ -28,6 +36,7 @@ class TestSettingsConfig(unittest.TestCase):
         self.assertEqual(result["llm"]["model"], "gpt-4")
         self.assertEqual(result["plugins"]["enabled"], ["shop"])
 
+    @unittest.skipUnless(HAS_TOMLI_W, "tomli_w not installed")
     def test_save_creates_parent_dirs(self):
         from companion_settings.config import save
         with tempfile.TemporaryDirectory() as d:
