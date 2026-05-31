@@ -3,11 +3,7 @@
 
 NG は利用側 (comment.py) が必ずチェーン末尾に付与する安全ゲート (ここでは生成のみ提供)。
 """
-import os
 import re
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 SAFE_GENERIC = "いい流れなのだ"
 
@@ -27,7 +23,7 @@ def sanitize(text, request=None):
 
 def make_ng_filter(ngwords, fallback):
     """NGフィルタ Processor を返す。NG含 → fallback(request) を sanitize、なお NG なら SAFE_GENERIC。"""
-    from ngword import contains_ng
+    from .ngword import contains_ng
 
     def process(text, request):
         if not contains_ng(text, ngwords):

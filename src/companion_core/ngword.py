@@ -5,9 +5,6 @@
 CLI `--list` で現在の NGワードを列挙。
 """
 import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_ngwords(paths):
