@@ -20,6 +20,8 @@ uv pip install -e .              # 開発
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
 - llm.py: OpenAI 互換 client (env COMPANION_LLM_BASE_URL/API_KEY/MODEL、旧 BPB_LLM_* も fallback 可)。
 
+設計の詳細・データフロー・plugin の作り方は [ARCHITECTURE.md](ARCHITECTURE.md) を参照。
+
 ## plugin 規約 (handler, duck typing)
 persona: str / fewshot: str (空可) / build_user(payload) -> str / template(request) -> str
 
