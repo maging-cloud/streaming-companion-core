@@ -112,3 +112,43 @@ class TestPluginsPanel(unittest.TestCase):
         panel = self._make(enabled=["shop"], kinds=["shop"])
         panel._set_enabled("shop", False)
         self.assertNotIn("shop", panel.get_config()["enabled"])
+
+
+@unittest.skipUnless(HAS_QT, "PySide6 not installed")
+class TestMainWindow(unittest.TestCase):
+    def _make(self, cfg=None, panels=None):
+        from companion_settings.window import MainWindow
+        return MainWindow(cfg=cfg or {}, extra_panels=panels or [])
+
+    def test_window_has_three_builtin_tabs(self):
+        win = self._make()
+        tab = win._tabs
+        labels = [tab.tabText(i) for i in range(tab.count())]
+        self.assertIn("LLM設定", labels)
+        self.assertIn("NGワード", labels)
+        self.assertIn("プラグイン", labels)
+
+    def test_plugin_panel_tab_added_when_enabled(self):
+        class FakePanel:
+            section_id = "shop"
+            label = "ショップ設定"
+            icon = ""
+            schema = {"type": "object", "properties": {}}
+
+        win = self._make(
+            cfg={"plugins": {"enabled": ["shop"]}},
+            panels=[FakePanel()],
+        )
+        labels = [win._tabs.tabText(i) for i in range(win._tabs.count())]
+        self.assertIn("ショップ設定", labels)
+
+    def test_plugin_panel_not_added_when_disabled(self):
+        class FakePanel:
+            section_id = "shop"
+            label = "ショップ設定"
+            icon = ""
+            schema = {"type": "object", "properties": {}}
+
+        win = self._make(cfg={}, panels=[FakePanel()])
+        labels = [win._tabs.tabText(i) for i in range(win._tabs.count())]
+        self.assertNotIn("ショップ設定", labels)
