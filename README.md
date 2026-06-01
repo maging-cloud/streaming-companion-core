@@ -15,6 +15,7 @@ uv pip install -e .              # 開発
 - registry.py: kind → handler 登録 + entry-point discovery (group `companion_core.handlers`)。
 - prompt.py: build_prompt(request, handler) — handler.persona/fewshot/build_user から (system,user)。
 - processor.py: sanitize + make_ng_filter + run_pipeline。
+- phrasebook.py: pick(seed, options) — 決定的フレーズ選択 (テンプレ単調化を防ぐ、同一局面→同一文)。
 - ngword.py: NGワード管理 (load_ngwords/contains_ng/default_paths)、`--list`。seed は同梱 ngwords.txt。
 - sink.py: 出力 Sink (text 既定) + fan_out。
 - sinks/file.py: file_sink(path) — 実況文を file へ書く Sink (OBS テキストソース用)。
