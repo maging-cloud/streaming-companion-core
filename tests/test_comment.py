@@ -42,5 +42,38 @@ class TestComment(unittest.TestCase):
         self.assertIn("Battery", out)   # fallback=handler.template に Battery
 
 
+class RoleHandler:
+    role = "解説する"
+
+    def build_user(self, payload):
+        return "u"
+
+    def template(self, request):
+        return "fallbackなのだ"
+
+
+class RecordingClient:
+    def __init__(self):
+        self.system = None
+
+    def complete(self, system, user):
+        self.system = system
+        return "出力なのだ"
+
+
+class TestCommentPersona(unittest.TestCase):
+    def test_comment_passes_persona_to_prompt(self):
+        from companion_core.persona import Persona
+        c = RecordingClient()
+        p = Persona(name="t", voice="VOICE-Z", fewshot="")
+        comment({"kind": "x", "payload": {}}, RoleHandler(), client=c, persona=p)
+        self.assertIn("VOICE-Z", c.system)
+
+    def test_comment_default_persona_is_zundamon(self):
+        c = RecordingClient()
+        comment({"kind": "x", "payload": {}}, RoleHandler(), client=c)
+        self.assertIn("ずんだもん", c.system)
+
+
 if __name__ == "__main__":
     unittest.main()
