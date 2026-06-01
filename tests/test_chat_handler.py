@@ -38,6 +38,7 @@ class TestZundamonChatHandler(unittest.TestCase):
         role = ZundamonChatHandler.role
         self.assertTrue(role)
         self.assertNotIn("Backpack", role)
+        self.assertNotIn("BPB", role)
 
     def test_template_ends_zundamon(self):
         t = ZundamonChatHandler().template({"payload": {"user": "a", "text": "hi"}})

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """kind → handler レジストリ + entry-point plugin discovery。
 
-handler は build_prompt/comment が期待する規約 (persona/fewshot/build_user/template) を満たすオブジェクト。
+handler は build_prompt/comment が期待する規約 (role/build_user/template) を満たすオブジェクト。
+persona/fewshot は旧規約として legacy fallback で引き続きサポートされる。
 外部パッケージは entry-point group "companion_core.handlers" に handler クラスを登録でき、
 get_handler 初回 miss 時に遅延 discover される。companion_core は plugin を import しない (boundary 維持)。
 """
