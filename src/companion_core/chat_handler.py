@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
-"""ChatHandler 基底 (persona 注入式) と既定 persona 実装。
+"""ChatHandler 基底 (role 規約式) と既定実装。
 
 - ChatHandler: 視聴者コメント返答の汎用 handler 基底。handler 規約
-  (persona/fewshot/build_user/template) を満たす。persona は空既定で、
-  サブクラス or コンストラクタ引数で注入できる。
-- ZundamonChatHandler: 既定 persona「ずんだもん」(VOICEVOX の汎用キャラ) の実装。
+  (role/build_user/template) を満たす。role はここに持ち、voice/口調は
+  companion_core.persona.Persona が担う (comment/build_prompt 経由で注入)。
+- ZundamonChatHandler: ずんだもん固定 template のチャット handler。
+  role のみ持ち、persona (声色・語尾) は外部 Persona から注入される。
   ゲーム非依存。アプリは entry-point でそのまま登録するか、ドメイン文脈だけ足して継承する。
 
-ずんだもん persona はゲーム解析知識を含まない汎用キャラなので core に同梱する
+ずんだもん固定 template はゲーム解析知識を含まない汎用フォールバックなので core に同梱する
 (batteries included)。特定ゲームへの言及・戦略知識はアプリ側が持つ。
 """
 
 
 class ChatHandler:
-    """視聴者コメントに返答する汎用 handler。persona は注入される。"""
+    """視聴者コメントに返答する汎用 handler。voice は persona、role はここ。"""
 
-    persona = ""
-    fewshot = ""
+    role = "視聴者のコメントに短く親しみを込めて返す。"
 
-    def __init__(self, persona=None, fewshot=None):
-        if persona is not None:
-            self.persona = persona
-        if fewshot is not None:
-            self.fewshot = fewshot
+    def __init__(self, role=None):
+        if role is not None:
+            self.role = role
 
     def build_user(self, payload):
         user = payload.get("user") or "視聴者"
@@ -34,18 +32,9 @@ class ChatHandler:
 
 
 class ZundamonChatHandler(ChatHandler):
-    """既定 persona「ずんだもん」の chat handler (ゲーム非依存・雑談向け)。"""
+    """既定 persona「ずんだもん」前提の chat handler (role + ずんだもん固定 template)。"""
 
-    persona = (
-        "あなたは配信のマスコット「ずんだもん」なのだ。"
-        "語尾は必ず「〜のだ」「〜なのだ」、一人称は「ボク」。"
-        "視聴者のコメントにゆるく短く (20〜50字・1文) 親しみを込めて返す。"
-        "引用符・括弧・絵文字・改行は使わない。"
-    )
-    fewshot = (
-        "例) コメント=今日暑いね -> ボクも溶けそうなのだ。水分とるのだ\n"
-        "例) コメント=こんばんは -> こんばんはなのだ。来てくれて嬉しいのだ"
-    )
+    role = "視聴者のコメントにゆるく短く20〜50字・1文で親しみを込めて返す。"
 
     def template(self, request):
         user = request.get("payload", {}).get("user") or "みんな"
