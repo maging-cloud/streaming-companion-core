@@ -36,6 +36,7 @@ fan_out(text, [sink, ...])   ← text / その他 Sink へ出力
 | `registry` | `kind → handler`。`register()` で明示登録、`get_handler()` が entry-point group `companion_core.handlers` を遅延 discover。 |
 | `prompt` | `build_prompt(request, handler) → (system, user)`。`handler.persona`/`fewshot`/`build_user(payload)` から組み立てる。 |
 | `processor` | `sanitize` (媒体非依存の整形) + `make_ng_filter` (NG フィルタ生成) + `run_pipeline`。 |
+| `phrasebook` | `pick(seed, options, **fmt)` — テンプレ単調化を防ぐ決定的フレーズ選択。seed のハッシュで候補から 1 つ選ぶ (同一局面→同一文)。 |
 | `ngword` | NG ワード管理 (`load_ngwords`/`contains_ng`/`default_paths`)。seed は同梱 `ngwords.txt`。 |
 | `sink` | 出力 Sink (`text` 既定) + `fan_out`。追加 Sink (音声/配信連携等) もゲーム非依存なため本パッケージに属する。 |
 | `sinks.file` | `file_sink(path, append=False)` — 実況文を file へ書く Sink (OBS テキストソース等のオーバーレイ)。stdlib のみ。 |
