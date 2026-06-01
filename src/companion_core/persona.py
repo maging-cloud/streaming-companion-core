@@ -14,7 +14,11 @@ class Persona:
     fewshot: str = ""   # 汎用例文 (口調を示す, タスク非依存)
 
     def system(self, role: str) -> str:
-        """voice + role を 1 つの system プロンプトに結合する。"""
+        """voice + role を 1 つの system プロンプトに結合する。
+
+        fewshot は含めない。build_prompt が system 末尾に別途追記する契約
+        (既存の handler.persona + handler.fewshot と同じ構成)。
+        """
         return f"{self.voice} {role}".strip()
 
 
@@ -28,7 +32,7 @@ ZUNDAMON = Persona(
 )
 
 
-def persona_from_config(cfg) -> Persona:
+def persona_from_config(cfg: dict) -> Persona:
     """config dict の [persona] セクションから生成。未設定なら ZUNDAMON。"""
     p = cfg.get("persona")
     if not p:
