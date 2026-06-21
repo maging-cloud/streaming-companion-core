@@ -1,22 +1,32 @@
-"""packaging ガード: console の静的アセットが source に存在し import 時に解決できること。
+"""packaging ガード: 統合 console の主要モジュールが import 可能なこと。
 
 wheel への同梱検証は CI の build ジョブ (scripts/check_wheel.py) が担う。本テストは
-source 側でアセットが消えていないこと (backend._STATIC が実ファイルを指すこと) を
-高速な単体テストとして保証する。
+source 側で主要モジュールが import できること (移動・削除での欠落) を保証する。
 """
+import os
 import unittest
 
-import companion_settings.console.backend as backend
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+try:
+    import PySide6  # noqa: F401
+    HAS_PYSIDE6 = True
+except ImportError:
+    HAS_PYSIDE6 = False
 
 
 class TestPackaging(unittest.TestCase):
-    def test_console_static_index_present(self):
-        index = backend._STATIC / "index.html"
-        self.assertTrue(index.exists(), f"missing console 静的アセット: {index}")
+    def test_core_console_providers_importable(self):
+        import companion_core.console_providers as cp
+        self.assertTrue(hasattr(cp, "discover_console_providers"))
+        self.assertTrue(hasattr(cp, "build_service"))
 
-    def test_index_is_html(self):
-        index = backend._STATIC / "index.html"
-        self.assertIn("<html", index.read_text(encoding="utf-8").lower())
+    @unittest.skipUnless(HAS_PYSIDE6, "PySide6 未インストール")
+    def test_settings_ui_importable(self):
+        import companion_settings.window as w
+        import companion_settings.live_panel as lp
+        self.assertTrue(hasattr(w, "MainWindow"))
+        self.assertTrue(hasattr(lp, "LivePanel"))
 
 
 if __name__ == "__main__":

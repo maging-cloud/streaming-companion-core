@@ -3,24 +3,28 @@ on:
   push:
     branches: [main]
   pull_request:
+env:
+  QT_QPA_PLATFORM: offscreen   # PySide6 を headless で動かす
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - run: sudo apt-get update && sudo apt-get install -y libegl1
       - run: uv venv
-      - run: uv pip install -e ".[console]"
+      - run: uv pip install -e ".[ui]"
       - run: uv run python -m unittest discover -s tests -p "test_*.py" -v
 
   build:
-    # wheel を実際に build し、必須アセット同梱 + clean env での import を検証する。
-    # editable install では露見しない packaging 不具合 (force-include 二重追加で
-    # build 失敗 / アセット欠落) を CI で捕捉する。
+    # wheel を実際に build し、必須モジュール同梱 + clean env での import を検証する。
+    # editable install では露見しない packaging 不具合 (build 失敗 / モジュール欠落) を
+    # CI で捕捉する。
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - run: sudo apt-get update && sudo apt-get install -y libegl1
       - name: build wheel
         run: uv build --wheel
       - name: verify wheel contents
@@ -28,5 +32,5 @@ jobs:
       - name: install built wheel in clean env and import
         run: |
           python3 -m venv /tmp/wenv
-          /tmp/wenv/bin/pip install dist/*.whl
-          /tmp/wenv/bin/python -c "import companion_settings.console.backend as b; from pathlib import Path; p = Path(b.__file__).parent / 'static' / 'index.html'; assert p.exists(), p; print('OK: installed wheel static present', p)"
+          /tmp/wenv/bin/pip install dist/*.whl PySide6
+          /tmp/wenv/bin/python -c "import companion_settings.window as w; import companion_core.console_providers as cp; print('OK: installed wheel imports', w.__name__, cp.__name__)"

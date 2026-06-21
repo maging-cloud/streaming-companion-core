@@ -13,12 +13,13 @@ from . import config
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, cfg=None, extra_panels=None):
+    def __init__(self, cfg=None, extra_panels=None, console_service=None):
         """cfg: 設定 dict（省略時は config.toml から読み込む）
         extra_panels: テスト用パネル注入（省略時は registry から discover）
+        console_service: ConsoleService。指定時のみ「ライブ」タブを追加する。
         """
         super().__init__()
-        self.setWindowTitle("companion-settings")
+        self.setWindowTitle("companion-console")
         self.setMinimumSize(640, 480)
 
         if cfg is None:
@@ -28,6 +29,9 @@ class MainWindow(QMainWindow):
         if extra_panels is None:
             extra_panels = discover_settings_panels()
         self._extra_panels = extra_panels
+
+        self._console_service = console_service
+        self._live = None
 
         self._setup_ui()
 
@@ -47,6 +51,12 @@ class MainWindow(QMainWindow):
             enabled=plugin_cfg.get("enabled", []),
             all_kinds=all_kinds,
         )
+        # ライブ制御タブ（console_service があるときのみ。設定タブより前に出す）
+        if self._console_service is not None:
+            from .live_panel import LivePanel
+            self._live = LivePanel(self._console_service)
+            self._tabs.addTab(self._live, "ライブ")
+
         self._tabs.addTab(self._llm, "LLM設定")
         self._tabs.addTab(self._ngword, "NGワード")
         self._tabs.addTab(self._plugins, "プラグイン")
@@ -94,3 +104,13 @@ class MainWindow(QMainWindow):
             "変更を適用するには companion を再起動してください。",
         )
         self.close()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if self._live is not None:
+            self._live.start_pump()
+
+    def closeEvent(self, event):
+        if self._live is not None:
+            self._live.stop_pump()
+        super().closeEvent(event)
