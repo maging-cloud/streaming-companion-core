@@ -29,4 +29,4 @@ jobs:
         run: |
           python3 -m venv /tmp/wenv
           /tmp/wenv/bin/pip install dist/*.whl
-          /tmp/wenv/bin/python -c "import companion_core.console.backend as b; from pathlib import Path; p = Path(b.__file__).parent / 'static' / 'index.html'; assert p.exists(), p; print('OK: installed wheel static present', p)"
+          /tmp/wenv/bin/python -c "import companion_settings.console.backend as b; from pathlib import Path; p = Path(b.__file__).parent / 'static' / 'index.html'; assert p.exists(), p; print('OK: installed wheel static present', p)"

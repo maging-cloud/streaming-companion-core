@@ -15,7 +15,7 @@ import sys
 import zipfile
 
 REQUIRED = [
-    "companion_core/console/static/index.html",
+    "companion_settings/console/static/index.html",
 ]
 
 

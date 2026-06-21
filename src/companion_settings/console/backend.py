@@ -1,6 +1,16 @@
-"""ThreadingHTTPServer による console backend。安定 API を提供し静的 UI を配信する。
+"""operator console の web フロントエンド (GUI)。ThreadingHTTPServer で安定 API を
+提供し静的 web UI を配信する。
 
-ロジックは ConsoleService に委譲。handler は薄い HTTP アダプタ。
+UI 非依存の制御ロジックは companion_core 側 (ConsoleService / ConsoleState /
+Supervisor / playback) にあり、本モジュールはそれを HTTP で公開する薄いアダプタ。
+将来の Qt フロントは ConsoleService を直接駆動できる (本 web backend は使わない)。
+
+  GET  /          静的 UI (index.html)
+  GET  /state     現在状態 (JSON)
+  GET  /events    SSE (状態変化を push)
+  GET  /config    config (JSON)
+  POST /control   {"action": start|stop|mute|unmute|replay}
+  PUT  /config    config を保存
   GET  /          静的 UI (index.html)
   GET  /state     現在状態 (JSON)
   GET  /events    SSE (状態変化を push)
@@ -109,12 +119,12 @@ def serve(service, host="127.0.0.1", port=8765):  # pragma: no cover - 実 runti
 
 
 def main(argv=None):  # pragma: no cover - CLI 配線
-    """workers を持たない core 単体起動 (UI/設定編集の確認用)。"""
-    from ..supervisor import Supervisor
-    from ..config import load_config
-    from .state import ConsoleState
-    from .service import ConsoleService
-    from .playback import make_player
+    """workers を持たない単体起動 (web UI/設定編集の確認用)。"""
+    from companion_core.supervisor import Supervisor
+    from companion_core.config import load_config
+    from companion_core.console.state import ConsoleState
+    from companion_core.console.service import ConsoleService
+    from companion_core.console.playback import make_player
 
     cfg = load_config()
     console = cfg.get("console", {})

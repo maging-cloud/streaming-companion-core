@@ -56,18 +56,28 @@ generic な部品は core に置き、**BPB は自分の entrypoint で core の
 
 ## パッケージ / コンポーネント構成
 
+> **改訂 (2026-06-21, v0.8.2):** UI 非依存ロジックは `companion_core` に、web フロント
+> (HTTP backend + 静的 UI) は **`companion_settings.console`** へ分離した。companion_settings は
+> 設定 UI (PySide6) と web operator console を束ねる「UI 層パッケージ」。これにより core は
+> HTTP/HTML を一切持たず、Qt フロントが `ConsoleService` を直接駆動する道も開く。
+
 ```
-src/companion_core/
-  supervisor.py   ← 新設: generic worker lifecycle（BPB から lift・generalize）
-  console/        ← 新設
+src/companion_core/                 ← UI 非依存 (stdlib, dep ゼロ)
+  supervisor.py   ← generic worker lifecycle（BPB から lift・generalize）
+  console/
     __init__.py
-    backend.py    ← ConsoleBackend: ThreadingHTTPServer, API, 静的UI配信
     state.py      ← ConsoleState: 現在 comment / history / worker 状態 / muted
+    service.py    ← ConsoleService: 制御ロジック（ingest=sink / TTS所有 / start/stop / config）
     playback.py   ← player: platform 分岐の WAV 再生（winsound/afplay/aplay）
-    static/        ← web UI（index.html / app.js / style.css）
-  config.py       ← 既存を拡張（[console] [speech] [playback] [voicevox] 追記。save 統合）
+  config.py       ← save_config 追加
   orchestrator.py ← 既存 SpeechGate（変更なし）
-  sinks/voicevox.py ← 既存（player 注入口は既にある。変更最小）
+  sinks/voicevox.py ← 既存（player 注入口は既にある）
+
+src/companion_settings/             ← UI 層 (web console + PySide6 設定 UI)
+  console/
+    __init__.py
+    backend.py    ← ThreadingHTTPServer: 安定 API + 静的UI配信（companion-console script）
+    static/index.html  ← web UI（layout A, 依存ゼロ静的HTML）
 ```
 
 ### コンポーネント責務

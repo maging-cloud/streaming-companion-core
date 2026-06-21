@@ -8,7 +8,7 @@ from http.server import ThreadingHTTPServer
 from companion_core.supervisor import Supervisor, Worker
 from companion_core.console.state import ConsoleState
 from companion_core.console.service import ConsoleService
-from companion_core.console.backend import make_handler
+from companion_settings.console.backend import make_handler
 
 
 class _Noop:
