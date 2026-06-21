@@ -54,17 +54,20 @@ BPB が entry-point group **`companion_core.console_providers`** に登録する
 class ConsoleProvider:
     label: str                                   # 表示名 (任意)
 
-    def synth(self, config) -> callable | None:  # callable(text) -> wav bytes。None 可 (TTS 無し)
-        ...
-    def player(self, config) -> callable | None: # callable(wav)。None 可 (再生無し)
-        ...
     def build_workers(self, ingest, config) -> list[Worker]:
         # ingest を sink に注入して worker 群を組む (comment が console へ流れる)
         ...
+
+    # synth(config) / player(config) は任意 override（通常は不要）
 ```
 
 `config` は `companion_core.config.load_config()` の結果（dict）。provider は自分の
 セクション（例 `[bpb]`）を読み、無ければ既定値を使う。
+
+**TTS 合成 (synth) と再生 (player) は generic なので core が config から既定構築する**
+（VOICEVOX = `[voicevox]` セクションの speaker/base_url、player = OS 既定デバイス）。ゲーム
+タイトル単位で TTS を差し替える需要は稀なため、provider の責務は実質 `build_workers` のみ。
+provider が `synth`/`player` メソッドを持つ場合だけ override される（薄い seam、BPB は使わない）。
 
 ### discover（companion_core/console_providers.py）
 
@@ -86,36 +89,29 @@ def discover_console_providers() -> list:
 
 ## 組み立て（汎用起動）
 
-`companion_settings/__main__.py` の `main()`:
+`companion_core.console_providers.build_service(provider, config)` が組み立てを担い、
+`companion_settings/__main__.py` の `main()` が呼ぶ:
 
 ```python
-def main():
-    from PySide6.QtWidgets import QApplication
-    from companion_core.console_providers import discover_console_providers
-    from companion_core.console.state import ConsoleState
-    from companion_core.console.service import ConsoleService
-    from companion_core.supervisor import Supervisor
-    from companion_core.config import load_config
-    from companion_settings.window import MainWindow
+# companion_core/console_providers.py
+def build_service(provider, config, ...):
+    synth = provider.synth(config) if hasattr(provider, "synth") else _default_synth(config)
+    player = provider.player(config) if hasattr(provider, "player") else _default_player(config)
+    svc = ConsoleService(None, ConsoleState(), synth=synth, player=player)
+    svc.supervisor = Supervisor(provider.build_workers(svc.ingest, config))  # 循環解消の順
+    return svc
 
+# companion_settings/__main__.py
+def main():
     cfg = load_config()
     providers = discover_console_providers()
-    svc = None
-    if providers:
-        p = providers[0]                                  # MVP: 先頭 provider を採用
-        synth = p.synth(cfg) if hasattr(p, "synth") else None
-        player = p.player(cfg) if hasattr(p, "player") else None
-        state = ConsoleState()
-        svc = ConsoleService(None, state, synth=synth, player=player)
-        svc.supervisor = Supervisor(p.build_workers(svc.ingest, cfg))
-        state.set_workers(svc.supervisor.status())
-
+    svc = build_service(providers[0], cfg) if providers else None   # MVP: 先頭 provider
     app = QApplication(sys.argv)
-    win = MainWindow(cfg=cfg, console_service=svc)         # svc 有→「ライブ」タブ表示
-    win.show()
+    MainWindow(cfg=cfg, console_service=svc).show()                 # svc 有→「ライブ」タブ
     sys.exit(app.exec())
 ```
 
+- **synth/player は core 既定**（`_default_synth` = `[voicevox]` から VoicevoxSink、`_default_player` = `make_player`）。provider override は任意。
 - **循環の解消**: synth/player を先取得 → svc 生成 → `build_workers(svc.ingest, cfg)`。
 - provider が無ければ `svc=None` で「ライブ」タブ無し（設定のみ）。core 単体でも起動可。
 - `companion-console` と `companion-settings` は同じ `main()` を指す（統合ウィンドウ）。
@@ -141,11 +137,10 @@ def main():
 ## BPB 側
 
 - **`commenter/console_provider.py`（新設）**: `BpbConsoleProvider` を実装し
-  `companion_core.console_providers` に登録。
-  - `synth(cfg)` = `VoicevoxSink(speaker=<cfg or 3>).synthesize`
-  - `player(cfg)` = `make_player()`
+  `companion_core.console_providers` に登録。**`build_workers` のみ**（synth/player は core 既定）。
   - `build_workers(ingest, cfg)` = 既存 `_build_workers` を再利用し `extra_sinks=[ingest]`。
     config は `cfg.get("bpb", {})` の値（save/rec/bundle/items_master/interval 等）＋既定値。
+  - TTS の speaker は generic な `[voicevox].speaker`（ずんだもん = 3）で設定する。
 - **`commenter/orchestrator.py`**: `_run_console` と `--console`/`--speaker`/`--host`/`--port` を**削除**。
   `bpb-companion`（通常の headless 並行起動）は不変。`_build_workers` は provider から呼ぶため残す。
 - **`pyproject.toml`**:
