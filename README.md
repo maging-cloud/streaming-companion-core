@@ -22,12 +22,32 @@ uv pip install -e .              # 開発
 - sinks/voicevox.py: VoicevoxSink — VOICEVOX HTTP で text→音声 (WAV)。HTTP は stdlib、再生は player 注入で依存ゼロ。
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
 - orchestrator.py: SpeechGate — 発話タイミング制御 (スコア変動 + クールダウン + 重要イベント)。
+- supervisor.py: Worker/worker_loop/Supervisor — 汎用 worker lifecycle (tick を thread で並行起動、協調停止)。
+- console/: Operator Console — 配信中の live 制御 backend (下記)。
 - chat_handler.py: ChatHandler (汎用基底, persona 注入式) + ZundamonChatHandler (既定 persona ずんだもん, ゲーム非依存)。
 - sources/chat.py: from_chat (chat→CommentRequest) + ChatRouter (kind 振り分け) + keyword_matcher。
 - sources/twitch.py: Twitch IRC parse + TwitchChatSource (PING 自動 PONG)。実接続 open_twitch_irc は network 依存。
 - llm.py: OpenAI 互換 client (env COMPANION_LLM_BASE_URL/API_KEY/MODEL、旧 BPB_LLM_* も fallback 可)。
 
 設計の詳細・データフロー・plugin の作り方は [ARCHITECTURE.md](ARCHITECTURE.md) を参照。
+
+## Operator Console
+
+配信中の live 制御 (start/stop/mute/replay/設定編集) を行う web console。実況パイプラインを
+GUI から操作する。TTS 合成・再生は backend が所有し、worker は `Supervisor` で host する。
+
+```
+uv pip install -e ".[console]"
+companion-console            # http://127.0.0.1:8765
+```
+
+安定 API (`GET /state` · `POST /control` · `GET·PUT /config` · `GET /events` SSE) を持ち、
+UI はその薄いクライアント。web UI を後から Rust/Qt フロントへ差し替えても backend は無改修。
+音声再生は OS 既定デバイス経由 (stdlib: winsound/afplay/aplay)。VB-CABLE 等を既定にすると配信へ流せる。
+`companion-console` 単体は workers 無しで UI/設定編集の確認用。実 worker 注入は consumer (BPB 等) の
+entrypoint が `Supervisor` + `ConsoleService` を組み立てて行う。
+
+設計: [docs/superpowers/specs/2026-06-21-operator-console-design.md](docs/superpowers/specs/2026-06-21-operator-console-design.md)
 
 ## plugin 規約 (handler, duck typing)
 persona: str / fewshot: str (空可) / build_user(payload) -> str / template(request) -> str

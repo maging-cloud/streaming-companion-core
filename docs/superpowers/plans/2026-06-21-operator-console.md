@@ -44,16 +44,17 @@ import unittest
 from companion_core.supervisor import Worker, worker_loop, Supervisor
 
 
-class _Stop:
-    """is_set() が n 回目以降 True を返す手動 stop。"""
-    def __init__(self, after):
-        self.after = after
-        self.n = 0
-    def is_set(self):
-        self.n += 1
-        return self.n > self.after
-    def set(self):
-        self.after = -1
+def _stop_after(n):
+    """n イテレーション (sleeper 呼び出し n 回) で set される Event と sleeper を返す。
+    worker_loop は 1 周で is_set() を 2 回呼ぶため、stop は sleeper 側で駆動する。"""
+    import threading
+    stop = threading.Event()
+    count = {"n": 0}
+    def sleeper(_s):
+        count["n"] += 1
+        if count["n"] >= n:
+            stop.set()
+    return stop, sleeper
 
 
 class _FakeThread:
@@ -75,8 +76,8 @@ class _FakeThread:
 class TestWorkerLoop(unittest.TestCase):
     def test_runs_tick_until_stop(self):
         calls = []
-        stop = _Stop(after=3)               # 3 周回して止まる
-        worker_loop(lambda: calls.append(1), 0.0, stop, sleeper=lambda s: None)
+        stop, sleeper = _stop_after(3)      # 3 周回して止まる
+        worker_loop(lambda: calls.append(1), 0.0, stop, sleeper=sleeper)
         self.assertEqual(len(calls), 3)
 
     def test_tick_exception_does_not_break_loop(self):
@@ -84,8 +85,8 @@ class TestWorkerLoop(unittest.TestCase):
         def tick():
             calls.append(1)
             raise RuntimeError("boom")
-        stop = _Stop(after=2)
-        worker_loop(tick, 0.0, stop, sleeper=lambda s: None)
+        stop, sleeper = _stop_after(2)
+        worker_loop(tick, 0.0, stop, sleeper=sleeper)
         self.assertEqual(len(calls), 2)     # 例外でも継続
 
 
