@@ -10,16 +10,20 @@ repos:
         types_or: [python, pyi, jupyter]
         args: [--fix, --exit-non-zero-on-fix]
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.1.0
+  # mypy は mirrors-mypy (隔離 venv の古い Python) ではなく、プロジェクトの
+  # uv venv (Python 3.14) 経由で実行する。3.14 構文を parse でき、mypy version も
+  # dev 依存 (mypy==2.1.0) に一致する。設定は pyproject [tool.mypy] に従う。
+  - repo: local
     hooks:
       - id: mypy
-        description: "Run mypy"
+        name: mypy
+        description: "Run mypy (uv / Python 3.14 経由)"
+        entry: uv run mypy
+        language: system
         types: [python]
+        require_serial: true
         # src のみ型強制 (disallow_untyped_defs=true)。tests は未注釈を許容するため対象外。
-        # types-all は壊れている (types-pkg-resources 消滅) ため除去。
         files: ^src/
-        args: [--ignore-missing-imports]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
