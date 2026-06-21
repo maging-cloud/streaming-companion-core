@@ -15,7 +15,9 @@ import sys
 import zipfile
 
 REQUIRED = [
-    "companion_settings/console/static/index.html",
+    "companion_core/console_providers.py",
+    "companion_settings/window.py",
+    "companion_settings/live_panel.py",
 ]
 
 
