@@ -11,7 +11,15 @@ dependencies = []
 # config 保存 (tomli-w) は consumer 側で。core lib 自体は stdlib のみ (dependencies=[])。
 [project.optional-dependencies]
 save = ["tomli-w>=1.0"]
-dev = ["pytest>=8"]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "pytest-cov==7.1.0",
+    "ruff==0.15.18",
+    "mypy==2.1.0",
+]
 
 # UI (PySide6 console) は別 repo streaming-companion-console へ分離。core は純 lib。
 
