@@ -9,18 +9,26 @@ max_ticks を注入でき、スレッドを使わず headless にテストでき
 import sys
 import threading
 import time
+from collections.abc import Callable, Iterable
+from typing import Any
 
 
 class Worker:
     """並行起動する 1 ワーカー。"""
 
-    def __init__(self, name, tick, interval):
+    def __init__(self, name: str, tick: Callable[[], Any], interval: float) -> None:
         self.name = name
         self.tick = tick
         self.interval = interval
 
 
-def worker_loop(tick, interval, stop, sleeper=time.sleep, max_ticks=None):
+def worker_loop(
+    tick: Callable[[], Any],
+    interval: float,
+    stop: threading.Event,
+    sleeper: Callable[[float], Any] = time.sleep,
+    max_ticks: int | None = None,
+) -> None:
     """stop がセットされるまで tick を回す。max_ticks 指定時はその回数で抜ける (テスト用)。"""
     n = 0
     while not stop.is_set():
@@ -39,37 +47,47 @@ def worker_loop(tick, interval, stop, sleeper=time.sleep, max_ticks=None):
 class Supervisor:
     """worker 群を thread で並行起動し、停止フラグで協調停止する。"""
 
-    def __init__(self, workers, spawn=None, sleeper=time.sleep, max_ticks=None):
+    def __init__(
+        self,
+        workers: Iterable[Worker],
+        spawn: Callable[..., Any] | None = None,
+        sleeper: Callable[[float], Any] = time.sleep,
+        max_ticks: int | None = None,
+    ) -> None:
         self.workers = list(workers)
         self._spawn = spawn or (lambda target, name, daemon: threading.Thread(target=target, name=name, daemon=daemon))
         self._sleeper = sleeper
         self._max_ticks = max_ticks
-        self._stop = None
-        self._threads = []
+        self._stop: threading.Event | None = None
+        self._threads: list[Any] = []
         self.running = False
 
-    def start(self):
+    def start(self) -> None:
         if self.running:
             return
-        self._stop = threading.Event()
+        stop = threading.Event()
+        self._stop = stop
         self._threads = []
         for w in self.workers:
             t = self._spawn(
-                lambda w=w: worker_loop(w.tick, w.interval, self._stop, self._sleeper, self._max_ticks), w.name, True
+                lambda w=w, stop=stop: worker_loop(w.tick, w.interval, stop, self._sleeper, self._max_ticks),
+                w.name,
+                True,
             )
             t.start()
             self._threads.append(t)
         self.running = True
 
-    def stop(self):
+    def stop(self) -> None:
         if not self.running:
             return
-        self._stop.set()
+        if self._stop is not None:
+            self._stop.set()
         for t in self._threads:
             t.join(timeout=5.0)
         self.running = False
 
-    def status(self):
+    def status(self) -> list[dict[str, Any]]:
         threads = self._threads or [None] * len(self.workers)
         return [
             {"name": w.name, "alive": (t.is_alive() if t else False)}

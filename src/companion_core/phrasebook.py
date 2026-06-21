@@ -9,9 +9,11 @@
 """
 
 import hashlib
+from collections.abc import Sequence
+from typing import Any
 
 
-def pick_index(seed, n):
+def pick_index(seed: Any, n: int) -> int:
     """seed (任意の値) に対し決定的に [0, n) の index を返す。n<=0 は ValueError。"""
     if n <= 0:
         raise ValueError(f"n は 1 以上: {n}")
@@ -21,7 +23,7 @@ def pick_index(seed, n):
     return int.from_bytes(h[:8], "big") % n
 
 
-def pick(seed, options, **fmt):
+def pick(seed: Any, options: Sequence[str], **fmt: Any) -> str:
     """options から seed で決定的に 1 つ選ぶ。fmt があれば str.format で埋める。空は ValueError。"""
     if not options:
         raise ValueError("options が空")

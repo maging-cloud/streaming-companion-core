@@ -66,5 +66,6 @@ combine-as-imports = true
 python_version = "3.14"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
 ignore_missing_imports = true

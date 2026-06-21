@@ -8,18 +8,25 @@
 import os
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 DEFAULT_PLAY_PATH = Path.home() / ".streaming-companion" / "last.wav"
 
 
-def make_player(play_path=None, platform=None, popen=None, winsound_mod=None):
+def make_player(
+    play_path: str | Path | None = None,
+    platform: str | None = None,
+    popen: Callable[[list[str]], Any] | None = None,
+    winsound_mod: Any = None,
+) -> Callable[[bytes], None]:
     """player(wav_bytes) を返す。wav を play_path に書いてから platform 別に再生。"""
     play_path = str(play_path) if play_path is not None else str(DEFAULT_PLAY_PATH)
     platform = platform if platform is not None else sys.platform
     popen = popen or (lambda args: subprocess.Popen(args))  # 非ブロッキング
 
-    def player(wav_bytes):
+    def player(wav_bytes: bytes) -> None:
         if not wav_bytes:
             return
         os.makedirs(os.path.dirname(play_path) or ".", exist_ok=True)

@@ -8,6 +8,7 @@ get_handler 初回 miss 時に遅延 discover される。companion_core は plu
 """
 
 import importlib.metadata
+from typing import Any
 
 ENTRY_POINT_GROUP = "companion_core.handlers"
 
@@ -15,12 +16,12 @@ _HANDLERS: dict[str, object] = {}
 _discovered = False
 
 
-def register(kind, handler):
+def register(kind: str, handler: object) -> None:
     """programmatic 登録 (テスト/明示注入)。discovery より優先される。"""
     _HANDLERS[kind] = handler
 
 
-def _discover():
+def _discover() -> None:
     global _discovered
     if _discovered:
         return
@@ -32,7 +33,7 @@ def _discover():
             pass  # 壊れた plugin は無視 (host は落ちない)
 
 
-def get_handler(kind):
+def get_handler(kind: str) -> Any:
     if kind not in _HANDLERS:
         _discover()
     h = _HANDLERS.get(kind)

@@ -6,9 +6,10 @@ CLI `--list` で現在の NGワードを列挙。
 """
 
 import os
+from collections.abc import Iterable
 
 
-def load_ngwords(paths):
+def load_ngwords(paths: Iterable[str]) -> list[str]:
     """複数ファイルから NGワードをマージ (#コメント/空行無視, 小文字化, 順序保持・重複除去)。"""
     words, seen = [], set()
     for p in paths:
@@ -26,13 +27,13 @@ def load_ngwords(paths):
     return words
 
 
-def contains_ng(text, ngwords):
+def contains_ng(text: str | None, ngwords: Iterable[str]) -> bool:
     """text が NGワードのいずれかを部分一致 (大小無視) で含むか。"""
     t = (text or "").lower()
     return any(w in t for w in ngwords)
 
 
-def default_paths():
+def default_paths() -> list[str]:
     import importlib.resources
 
     seed = importlib.resources.files("companion_core") / "ngwords.txt"
@@ -40,7 +41,7 @@ def default_paths():
     return [str(seed), user]
 
 
-def _main():
+def _main() -> int:
     import argparse
 
     ap = argparse.ArgumentParser()
