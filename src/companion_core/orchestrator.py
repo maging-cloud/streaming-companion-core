@@ -12,26 +12,33 @@
 """
 
 import time
+from collections.abc import Callable, Iterable
 
 
 class SpeechGate:
     """発話判定ゲート。`should_speak(...)` が True を返した時だけ状態を更新する。"""
 
-    def __init__(self, min_interval=5.0, score_delta=0.1, important_kinds=(), clock=None):
+    def __init__(
+        self,
+        min_interval: float = 5.0,
+        score_delta: float = 0.1,
+        important_kinds: Iterable[str] = (),
+        clock: Callable[[], float] | None = None,
+    ) -> None:
         self.min_interval = min_interval
         self.score_delta = score_delta
         self.important_kinds = set(important_kinds)
         self._clock = clock or time.monotonic
-        self._last_spoken = None  # 最後に発話した時刻 (None = 未発話)
-        self._baseline = None  # 最後に発話したときのスコア基準
+        self._last_spoken: float | None = None  # 最後に発話した時刻 (None = 未発話)
+        self._baseline: float | None = None  # 最後に発話したときのスコア基準
 
-    def _speak(self, score):
+    def _speak(self, score: float | None) -> bool:
         self._last_spoken = self._clock()
         if score is not None:
             self._baseline = score
         return True
 
-    def should_speak(self, *, score=None, kind=None, force=False):
+    def should_speak(self, *, score: float | None = None, kind: str | None = None, force: bool = False) -> bool:
         """発話すべきか。True のとき内部状態を更新する。"""
         if force or kind in self.important_kinds:
             return self._speak(score)

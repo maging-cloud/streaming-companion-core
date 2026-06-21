@@ -1,12 +1,18 @@
 """config.toml リーダー (標準ライブラリのみ, Python 3.11+ 向け)。"""
 
+from __future__ import annotations
+
 import tomllib
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .llm import OpenAIClient
 
 DEFAULT_PATH = Path.home() / ".streaming-companion" / "config.toml"
 
 
-def load_config(path=None):
+def load_config(path: str | Path | None = None) -> dict[str, Any]:
     """config.toml を読み込む。ファイルがなければ空 dict を返す。"""
     p = Path(path) if path is not None else DEFAULT_PATH
     if not p.exists():
@@ -15,7 +21,7 @@ def load_config(path=None):
         return tomllib.load(f)
 
 
-def make_client_from_config(cfg):
+def make_client_from_config(cfg: dict[str, Any]) -> OpenAIClient | None:
     """cfg の [llm] セクションから OpenAIClient を生成。未設定なら None。"""
     from .llm import OpenAIClient
 
@@ -27,7 +33,7 @@ def make_client_from_config(cfg):
     return None
 
 
-def save_config(cfg, path=None):
+def save_config(cfg: dict[str, Any], path: str | Path | None = None) -> None:
     """cfg を config.toml に書き出す。tomli-w が要る (optional extra `console`/`ui`)。"""
     import tomli_w
 

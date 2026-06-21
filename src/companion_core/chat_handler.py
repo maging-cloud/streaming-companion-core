@@ -12,22 +12,24 @@
 (batteries included)。特定ゲームへの言及・戦略知識はアプリ側が持つ。
 """
 
+from typing import Any
+
 
 class ChatHandler:
     """視聴者コメントに返答する汎用 handler。voice は persona、role はここ。"""
 
     role = "視聴者のコメントに短く親しみを込めて返す。"
 
-    def __init__(self, role=None):
+    def __init__(self, role: str | None = None) -> None:
         if role is not None:
             self.role = role
 
-    def build_user(self, payload):
+    def build_user(self, payload: dict[str, Any]) -> str:
         user = payload.get("user") or "視聴者"
         text = payload.get("text") or ""
         return f"{user} さんのコメント: {text}\nこれに短く返答してほしい"
 
-    def template(self, request):
+    def template(self, request: dict[str, Any]) -> str:
         return "コメントありがとう"
 
 
@@ -36,6 +38,6 @@ class ZundamonChatHandler(ChatHandler):
 
     role = "視聴者のコメントにゆるく短く20〜50字・1文で親しみを込めて返す。"
 
-    def template(self, request):
+    def template(self, request: dict[str, Any]) -> str:
         user = request.get("payload", {}).get("user") or "みんな"
         return f"{user}、コメントありがとうなのだ"

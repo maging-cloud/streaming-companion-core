@@ -18,11 +18,13 @@ TTS 合成 (synth) と音声再生 (player) は generic なので **core が con
 """
 
 import importlib.metadata
+from collections.abc import Callable
+from typing import Any
 
 _GROUP = "companion_core.console_providers"
 
 
-def _default_synth(config):
+def _default_synth(config: dict[str, Any]) -> Callable[[str], Any]:
     """config の [voicevox] から VOICEVOX 合成関数を作る (core 既定)。"""
     from .sinks.voicevox import DEFAULT_BASE_URL, VoicevoxSink
 
@@ -30,14 +32,14 @@ def _default_synth(config):
     return VoicevoxSink(speaker=vv.get("speaker", 1), base_url=vv.get("base_url", DEFAULT_BASE_URL)).synthesize
 
 
-def _default_player(config):
+def _default_player(config: dict[str, Any]) -> Callable[[Any], None]:
     """OS 既定デバイスへ再生する player を作る (core 既定)。"""
     from .console.playback import make_player
 
     return make_player()
 
 
-def discover_console_providers():
+def discover_console_providers() -> list[Any]:
     """登録された console provider を検索・instantiate して返す。失敗は握りつぶす。"""
     providers = []
     for ep in importlib.metadata.entry_points(group=_GROUP):
@@ -49,8 +51,15 @@ def discover_console_providers():
 
 
 def build_service(
-    provider, config, *, console_state=None, service_cls=None, supervisor_cls=None, make_synth=None, make_player=None
-):
+    provider: Any,
+    config: dict[str, Any],
+    *,
+    console_state: Any = None,
+    service_cls: Any = None,
+    supervisor_cls: Any = None,
+    make_synth: Callable[[dict[str, Any]], Any] | None = None,
+    make_player: Callable[[dict[str, Any]], Any] | None = None,
+) -> Any:
     """provider と config から ConsoleService を組み立てる。
 
     synth/player は core が config から既定構築する (provider が同名メソッドを持てば override)。

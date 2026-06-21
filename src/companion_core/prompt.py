@@ -9,8 +9,15 @@ handler 規約 (duck typing):
   handler.build_user(payload) -> str
 """
 
+from __future__ import annotations
 
-def build_prompt(request, handler, persona=None):
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .persona import Persona
+
+
+def build_prompt(request: dict[str, Any], handler: Any, persona: Persona | None = None) -> tuple[str, str]:
     """CommentRequest + handler + persona → (system, user)。
 
     handler が .role を持てば persona.system(role) + persona.fewshot を使う。

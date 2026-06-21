@@ -5,7 +5,9 @@ core は kind/payload の内部構造を仮定せず handler に委譲する。
 from_recommendation のような入力源固有の生成は利用側 (例: ゲーム固有の commenter) が持つ。
 """
 
+from typing import Any
 
-def make_request(kind, payload):
+
+def make_request(kind: str, payload: Any) -> dict[str, Any]:
     """CommentRequest を組み立てる汎用コンストラクタ。"""
     return {"kind": kind, "payload": payload}

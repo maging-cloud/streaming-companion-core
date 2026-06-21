@@ -10,9 +10,12 @@
 COMPANION_LLM_* が設定されている場合は常にそちらが優先される。
 """
 
+from __future__ import annotations
+
 import json
 import os
 import urllib.request
+from collections.abc import Mapping
 
 ENV_BASE = "COMPANION_LLM_BASE_URL"
 ENV_KEY = "COMPANION_LLM_API_KEY"
@@ -25,7 +28,7 @@ _LEGACY = {
 }
 
 
-def _get(env, key):
+def _get(env: Mapping[str, str], key: str) -> str | None:
     v = env.get(key)
     return v if v is not None else env.get(_LEGACY[key])
 
@@ -33,13 +36,13 @@ def _get(env, key):
 class OpenAIClient:
     """OpenAI 互換 /chat/completions クライアント (標準ライブラリのみ)。"""
 
-    def __init__(self, base_url, api_key, model, timeout=60):
+    def __init__(self, base_url: str, api_key: str | None, model: str, timeout: float = 60) -> None:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
 
-    def complete(self, system, user):
+    def complete(self, system: str, user: str) -> str:
         body = json.dumps(
             {
                 "model": self.model,
@@ -53,10 +56,11 @@ class OpenAIClient:
         req = urllib.request.Request(self.base_url + "/chat/completions", data=body, headers=headers)
         with urllib.request.urlopen(req, timeout=self.timeout) as r:
             resp = json.loads(r.read().decode("utf-8"))
-        return resp["choices"][0]["message"]["content"]
+        content: str = resp["choices"][0]["message"]["content"]
+        return content
 
 
-def make_client_from_env(env=None):
+def make_client_from_env(env: Mapping[str, str] | None = None) -> OpenAIClient | None:
     """env に OpenAI 互換設定が十分あれば OpenAIClient、無ければ None。
     新 prefix COMPANION_LLM_* を優先し、旧 BPB_LLM_* を後方互換 fallback として受け付ける。"""
     env = env if env is not None else os.environ

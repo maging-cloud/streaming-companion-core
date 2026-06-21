@@ -6,12 +6,22 @@ Processor チェーン = (processors or [sanitize]) + [make_ng_filter(ngwords, h
 NG を必ず末尾に付与し出力に NG が残らないことを保証する安全ゲート。
 """
 
-from .persona import ZUNDAMON
+from collections.abc import Callable, Iterable, Sequence
+from typing import Any
+
+from .persona import ZUNDAMON, Persona
 from .processor import make_ng_filter, run_pipeline, sanitize
 from .prompt import build_prompt
 
 
-def comment(request, handler, client=None, processors=None, ngwords=None, persona=None):
+def comment(
+    request: dict[str, Any],
+    handler: Any,
+    client: Any = None,
+    processors: Sequence[Callable[..., str]] | None = None,
+    ngwords: Iterable[str] | None = None,
+    persona: Persona | None = None,
+) -> str:
     """request + handler -> 安全な実況文。client=None で handler.template。NG を必ず適用。
 
     persona は LLM 経路の口調 (未指定は ZUNDAMON)。template fallback は persona 非依存

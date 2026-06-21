@@ -16,9 +16,9 @@ repos:
       - id: mypy
         description: "Run mypy"
         types: [python]
+        # src のみ型強制 (disallow_untyped_defs=true)。tests は未注釈を許容するため対象外。
         # types-all は壊れている (types-pkg-resources 消滅) ため除去。
-        # --strict は pyproject [tool.mypy] の disallow_untyped_defs=false と矛盾し
-        # 全コード未注釈で大量エラーになるため外す (pyproject の設定に従う)。
+        files: ^src/
         args: [--ignore-missing-imports]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

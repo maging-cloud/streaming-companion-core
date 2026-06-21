@@ -8,8 +8,13 @@ TwitchChatSource: 行イテレータ (注入) を消費して privmsg dict を y
 パース/source 本体は注入で完全にテスト可能。
 """
 
+from __future__ import annotations
 
-def parse_irc_line(line):
+from collections.abc import Callable, Iterable, Iterator
+from typing import Any
+
+
+def parse_irc_line(line: str | None) -> dict[str, str] | None:
     """IRC 1 行をパースする。対象外は None。"""
     line = (line or "").rstrip("\r\n")
     if not line:
@@ -33,11 +38,11 @@ def parse_irc_line(line):
 class TwitchChatSource:
     """注入された行イテレータから privmsg を yield する。PING は PONG 自動応答。"""
 
-    def __init__(self, recv_lines, send=None):
+    def __init__(self, recv_lines: Iterable[str], send: Callable[[str], Any] | None = None) -> None:
         self._recv = recv_lines  # iterable[str]
         self._send = send or (lambda _s: None)  # callable(str): IRC へ送信
 
-    def messages(self):
+    def messages(self) -> Iterator[dict[str, str]]:
         """privmsg dict を順に yield する。"""
         for line in self._recv:
             parsed = parse_irc_line(line)
@@ -50,7 +55,9 @@ class TwitchChatSource:
                 yield parsed
 
 
-def open_twitch_irc(token, nick, channel, host="irc.chat.twitch.tv", port=6667):  # pragma: no cover
+def open_twitch_irc(
+    token: str, nick: str, channel: str, host: str = "irc.chat.twitch.tv", port: int = 6667
+) -> tuple[Iterator[str], Callable[[str], None]]:  # pragma: no cover
     """Twitch IRC に接続し (recv_lines, send) を返す (network 依存・テスト対象外)。
 
     token は oauth:xxxx 形式。channel は "#name"。返り値の recv_lines を TwitchChatSource に渡す。
@@ -60,14 +67,14 @@ def open_twitch_irc(token, nick, channel, host="irc.chat.twitch.tv", port=6667):
     sock = socket.create_connection((host, port))
     sock_file = sock.makefile("r", encoding="utf-8", newline="\r\n")
 
-    def send(msg):
+    def send(msg: str) -> None:
         sock.sendall((msg + "\r\n").encode("utf-8"))
 
     send(f"PASS {token}")
     send(f"NICK {nick}")
     send(f"JOIN {channel}")
 
-    def recv_lines():
+    def recv_lines() -> Iterator[str]:
         yield from sock_file
 
     return recv_lines(), send

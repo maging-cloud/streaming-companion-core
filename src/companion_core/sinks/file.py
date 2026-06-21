@@ -5,9 +5,10 @@
 """
 
 import os
+from collections.abc import Callable
 
 
-def file_sink(path, append=False, encoding="utf-8"):
+def file_sink(path: str, append: bool = False, encoding: str = "utf-8") -> Callable[[str], str]:
     """path に text を書く Sink を返す。append=False は上書き、True は 1 行追記。
 
     親ディレクトリが無ければ作成する。返り値の Sink は受け取った text を返す
@@ -15,7 +16,7 @@ def file_sink(path, append=False, encoding="utf-8"):
     """
     path = os.path.expanduser(path)
 
-    def sink(text):
+    def sink(text: str) -> str:
         parent = os.path.dirname(path)
         if parent:
             os.makedirs(parent, exist_ok=True)

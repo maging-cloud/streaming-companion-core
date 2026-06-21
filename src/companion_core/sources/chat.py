@@ -10,22 +10,25 @@
 「何がゲーム関連か」等の語彙はゲーム固有なので、利用側が keyword_matcher 等で ChatRouter に注入する。
 """
 
+from collections.abc import Callable, Iterable
+from typing import Any
 
-def make_chat_message(user, text, channel=None):
+
+def make_chat_message(user: str, text: str, channel: str | None = None) -> dict[str, Any]:
     """チャットメッセージを正規化 dict にする。"""
     return {"user": user, "text": text, "channel": channel}
 
 
-def from_chat(user, text, kind="chat"):
+def from_chat(user: str, text: str, kind: str = "chat") -> dict[str, Any]:
     """チャット → CommentRequest{kind, payload:{user,text}}。kind は ChatRouter が決める。"""
     return {"kind": kind, "payload": {"user": user, "text": text}}
 
 
-def keyword_matcher(words):
+def keyword_matcher(words: Iterable[str]) -> Callable[[dict[str, Any]], bool]:
     """message['text'] が words のいずれかを部分一致 (大小無視) で含むか判定する matcher を返す。"""
     lowered = [w.lower() for w in words]
 
-    def matcher(message):
+    def matcher(message: dict[str, Any]) -> bool:
         t = (message.get("text") or "").lower()
         return any(w in t for w in lowered)
 
@@ -35,11 +38,15 @@ def keyword_matcher(words):
 class ChatRouter:
     """チャットメッセージを kind に振り分ける。"""
 
-    def __init__(self, rules=None, default_kind="chat"):
+    def __init__(
+        self,
+        rules: Iterable[tuple[Callable[[dict[str, Any]], bool], str]] | None = None,
+        default_kind: str = "chat",
+    ) -> None:
         self.rules = list(rules or [])
         self.default_kind = default_kind
 
-    def route(self, message):
+    def route(self, message: dict[str, Any]) -> str:
         """message dict → kind。rules を順に評価し最初に一致、無ければ default_kind。"""
         for matcher, kind in self.rules:
             if matcher(message):

@@ -13,6 +13,8 @@ VOICEVOX エンジン (既定 http://localhost:50021) の 2 段 API を叩く:
 import json
 import urllib.parse
 import urllib.request
+from collections.abc import Callable
+from typing import Any
 
 DEFAULT_BASE_URL = "http://localhost:50021"
 
@@ -20,7 +22,15 @@ DEFAULT_BASE_URL = "http://localhost:50021"
 class VoicevoxSink:
     """text を VOICEVOX で合成する Sink。`sink(text)` で WAV bytes を返す。"""
 
-    def __init__(self, speaker=1, base_url=DEFAULT_BASE_URL, timeout=10, player=None, save_path=None, opener=None):
+    def __init__(
+        self,
+        speaker: int = 1,
+        base_url: str = DEFAULT_BASE_URL,
+        timeout: float = 10,
+        player: Callable[[bytes], Any] | None = None,
+        save_path: str | None = None,
+        opener: Any = None,
+    ) -> None:
         self.speaker = speaker
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
@@ -28,22 +38,23 @@ class VoicevoxSink:
         self.save_path = save_path  # 指定時は WAV を書き出す
         self._opener = opener or urllib.request.urlopen  # テストで差し替え可能
 
-    def _post(self, path, params=None, data=None):
+    def _post(self, path: str, params: dict[str, Any] | None = None, data: bytes | None = None) -> bytes:
         url = self.base_url + path
         if params:
             url += "?" + urllib.parse.urlencode(params)
         headers = {"Content-Type": "application/json"} if data is not None else {}
         req = urllib.request.Request(url, data=data, headers=headers, method="POST")
         with self._opener(req, timeout=self.timeout) as r:
-            return r.read()
+            result: bytes = r.read()
+        return result
 
-    def synthesize(self, text):
+    def synthesize(self, text: str) -> bytes:
         """text → WAV bytes。audio_query → synthesis の 2 段。"""
         query_bytes = self._post("/audio_query", params={"text": text, "speaker": self.speaker})
         query = json.loads(query_bytes.decode("utf-8"))
         return self._post("/synthesis", params={"speaker": self.speaker}, data=json.dumps(query).encode("utf-8"))
 
-    def __call__(self, text):
+    def __call__(self, text: str) -> bytes:
         wav = self.synthesize(text)
         if self.save_path:
             with open(self.save_path, "wb") as f:
