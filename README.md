@@ -45,6 +45,9 @@ companion-console            # 統合ウィンドウ (companion_settings.__main_
 
 - 起動時に `companion_core.console_providers` entry-point を discover し、provider があれば
   `ConsoleService` を組み立てて「ライブ」タブを表示する。provider が無ければ設定タブのみ。
+- タブ: ライブ / LLM設定 / **TTS設定 (VOICEVOX: speaker・base_url)** / NGワード / プラグイン。
+  TTS設定は編集で起動中 console へ **live 反映** (synth 差し替え、再起動不要)、保存で
+  `config.toml [voicevox]` に永続化、破棄で直近保存値に戻す。
 - ライブ更新は `ConsoleState.subscribe()` の queue を別スレッドで drain → Qt signal で描画。
 - TTS 合成・再生は `ConsoleService` が所有。音声再生は OS 既定デバイス経由
   (stdlib: winsound/afplay/aplay)。VB-CABLE 等を既定にすると配信へ流せる。

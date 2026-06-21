@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
 from .panels.llm import LLMPanel
 from .panels.ngword import NGWordPanel
 from .panels.plugins import PluginsPanel
+from .panels.voicevox import VoicevoxPanel
 from .registry import discover_settings_panels, discover_handler_kinds
 from .schema_ui import build_form
 from . import config
@@ -57,7 +58,13 @@ class MainWindow(QMainWindow):
             self._live = LivePanel(self._console_service)
             self._tabs.addTab(self._live, "ライブ")
 
+        self._voicevox = VoicevoxPanel(
+            self._cfg.get("voicevox", {}),
+            apply_cb=self._apply_voicevox,
+            persist_cb=self._persist_voicevox,
+        )
         self._tabs.addTab(self._llm, "LLM設定")
+        self._tabs.addTab(self._voicevox, "TTS設定")
         self._tabs.addTab(self._ngword, "NGワード")
         self._tabs.addTab(self._plugins, "プラグイン")
 
@@ -104,6 +111,19 @@ class MainWindow(QMainWindow):
             "変更を適用するには companion を再起動してください。",
         )
         self.close()
+
+    def _apply_voicevox(self, new):
+        """TTS 設定を起動中の console に live 反映する (synth を作り直して差し替え)。"""
+        if self._console_service is None:
+            return
+        from companion_core.console_providers import _default_synth
+        self._console_service.synth = _default_synth({"voicevox": new})
+
+    def _persist_voicevox(self, new):
+        """TTS 設定を config.toml の [voicevox] に永続化する (他セクションは保持)。"""
+        cur = config.load()
+        cur["voicevox"] = new
+        config.save(cur)
 
     def showEvent(self, event):
         super().showEvent(event)
