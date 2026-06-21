@@ -1127,7 +1127,7 @@ document.getElementById("toggle").onclick = () => post(running ? "stop" : "start
 document.getElementById("mute").onclick   = () => post(muted ? "unmute" : "mute");
 document.getElementById("replay").onclick = () => post("replay");
 async function loadCfg(){
-  const r = await fetch("/config"); 
+  const r = await fetch("/config");
   document.getElementById("cfg").textContent = JSON.stringify(await r.json(), null, 2);
 }
 const es = new EventSource("/events");

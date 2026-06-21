@@ -1,5 +1,6 @@
 import unittest
-from companion_core.sink import text_sink, get_sink, fan_out
+
+from companion_core.sink import fan_out, get_sink, text_sink
 
 
 class TestSink(unittest.TestCase):
@@ -11,12 +12,17 @@ class TestSink(unittest.TestCase):
 
     def test_get_sink_unknown_raises(self):
         with self.assertRaises(ValueError):
-            get_sink("voicevox")          # 未実装
+            get_sink("voicevox")  # 未実装
 
     def test_fan_out_calls_all(self):
         calls = []
-        s1 = lambda t: calls.append(("a", t))
-        s2 = lambda t: calls.append(("b", t))
+
+        def s1(t):
+            calls.append(("a", t))
+
+        def s2(t):
+            calls.append(("b", t))
+
         fan_out("X", [s1, s2])
         self.assertEqual(calls, [("a", "X"), ("b", "X")])
 

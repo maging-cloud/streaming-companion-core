@@ -9,8 +9,9 @@
 旧 BPB_LLM_BASE_URL / BPB_LLM_API_KEY / BPB_LLM_MODEL も後方互換 fallback として受け付ける。
 COMPANION_LLM_* が設定されている場合は常にそちらが優先される。
 """
-import os
+
 import json
+import os
 import urllib.request
 
 ENV_BASE = "COMPANION_LLM_BASE_URL"
@@ -39,17 +40,17 @@ class OpenAIClient:
         self.timeout = timeout
 
     def complete(self, system, user):
-        body = json.dumps({
-            "model": self.model,
-            "messages": [{"role": "system", "content": system},
-                         {"role": "user", "content": user}],
-            "temperature": 0,
-        }).encode("utf-8")
+        body = json.dumps(
+            {
+                "model": self.model,
+                "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+                "temperature": 0,
+            }
+        ).encode("utf-8")
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
-        req = urllib.request.Request(self.base_url + "/chat/completions",
-                                     data=body, headers=headers)
+        req = urllib.request.Request(self.base_url + "/chat/completions", data=body, headers=headers)
         with urllib.request.urlopen(req, timeout=self.timeout) as r:
             resp = json.loads(r.read().decode("utf-8"))
         return resp["choices"][0]["message"]["content"]

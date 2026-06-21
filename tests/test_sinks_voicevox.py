@@ -3,7 +3,8 @@ import json
 import os
 import tempfile
 import unittest
-from companion_core.sinks.voicevox import VoicevoxSink, DEFAULT_BASE_URL
+
+from companion_core.sinks.voicevox import DEFAULT_BASE_URL, VoicevoxSink
 
 
 class _FakeResp(io.BytesIO):
@@ -70,8 +71,7 @@ class TestVoicevoxSink(unittest.TestCase):
         self.assertEqual(VoicevoxSink().base_url, "http://localhost:50021")
 
     def test_base_url_trailing_slash_stripped(self):
-        self.assertEqual(VoicevoxSink(base_url="http://host:50021/").base_url,
-                         "http://host:50021")
+        self.assertEqual(VoicevoxSink(base_url="http://host:50021/").base_url, "http://host:50021")
 
 
 if __name__ == "__main__":

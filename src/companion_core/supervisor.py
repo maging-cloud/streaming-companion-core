@@ -5,6 +5,7 @@
 stop イベントまで tick を回し、tick 内の例外は握りつぶして継続する。spawn / sleeper /
 max_ticks を注入でき、スレッドを使わず headless にテストできる。
 """
+
 import sys
 import threading
 import time
@@ -40,8 +41,7 @@ class Supervisor:
 
     def __init__(self, workers, spawn=None, sleeper=time.sleep, max_ticks=None):
         self.workers = list(workers)
-        self._spawn = spawn or (lambda target, name, daemon: threading.Thread(
-            target=target, name=name, daemon=daemon))
+        self._spawn = spawn or (lambda target, name, daemon: threading.Thread(target=target, name=name, daemon=daemon))
         self._sleeper = sleeper
         self._max_ticks = max_ticks
         self._stop = None
@@ -55,9 +55,8 @@ class Supervisor:
         self._threads = []
         for w in self.workers:
             t = self._spawn(
-                lambda w=w: worker_loop(w.tick, w.interval, self._stop,
-                                        self._sleeper, self._max_ticks),
-                w.name, True)
+                lambda w=w: worker_loop(w.tick, w.interval, self._stop, self._sleeper, self._max_ticks), w.name, True
+            )
             t.start()
             self._threads.append(t)
         self.running = True
@@ -72,5 +71,7 @@ class Supervisor:
 
     def status(self):
         threads = self._threads or [None] * len(self.workers)
-        return [{"name": w.name, "alive": (t.is_alive() if t else False)}
-                for w, t in zip(self.workers, threads)]
+        return [
+            {"name": w.name, "alive": (t.is_alive() if t else False)}
+            for w, t in zip(self.workers, threads, strict=False)
+        ]

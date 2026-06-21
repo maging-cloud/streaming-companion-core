@@ -4,18 +4,18 @@
 TTS 合成 (synth) → 再生 (player) を駆動する (mute 時は再生しない)。start/stop は
 Supervisor を直叩き。config は companion_core.config を再利用。
 """
+
 import time
 
 from .. import config as _config
 
 
 class ConsoleService:
-    def __init__(self, supervisor, state, synth=None, player=None,
-                 config_path=None, clock=None):
+    def __init__(self, supervisor, state, synth=None, player=None, config_path=None, clock=None):
         self.supervisor = supervisor
         self.state = state
-        self.synth = synth          # callable(text) -> wav bytes | None
-        self.player = player        # callable(wav bytes)
+        self.synth = synth  # callable(text) -> wav bytes | None
+        self.player = player  # callable(wav bytes)
         self.config_path = config_path
         self._clock = clock or time.time
 
@@ -52,8 +52,7 @@ class ConsoleService:
             if self.state.last_wav and self.player is not None:
                 self.player(self.state.last_wav)
         else:
-            return {"ok": False, "error": f"unknown action: {action}",
-                    "state": self.state.snapshot()}
+            return {"ok": False, "error": f"unknown action: {action}", "state": self.state.snapshot()}
         return {"ok": True, "state": self.state.snapshot()}
 
     # ---- state / config ----

@@ -1,4 +1,5 @@
 import unittest
+
 from companion_core.chat_handler import ChatHandler, ZundamonChatHandler
 
 
@@ -24,6 +25,7 @@ class TestChatHandlerBase(unittest.TestCase):
     def test_role_injectable_via_subclass(self):
         class MyChat(ChatHandler):
             role = "ROLE-X"
+
         self.assertEqual(MyChat().role, "ROLE-X")
 
     def test_role_injectable_via_init(self):

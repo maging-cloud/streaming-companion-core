@@ -17,6 +17,7 @@ def build_prompt(request, handler, persona=None):
     .role を持たない旧 handler は .persona / .fewshot をそのまま使う (後方互換)。
     """
     from .persona import ZUNDAMON
+
     persona = persona or ZUNDAMON
     role = getattr(handler, "role", None)
     if role is None:

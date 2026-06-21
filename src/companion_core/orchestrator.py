@@ -10,6 +10,7 @@
 
 時刻は `clock` (引数なしで monotonic 秒を返す callable) で注入でき、テスト可能。
 """
+
 import time
 
 
@@ -21,8 +22,8 @@ class SpeechGate:
         self.score_delta = score_delta
         self.important_kinds = set(important_kinds)
         self._clock = clock or time.monotonic
-        self._last_spoken = None    # 最後に発話した時刻 (None = 未発話)
-        self._baseline = None       # 最後に発話したときのスコア基準
+        self._last_spoken = None  # 最後に発話した時刻 (None = 未発話)
+        self._baseline = None  # 最後に発話したときのスコア基準
 
     def _speak(self, score):
         self._last_spoken = self._clock()
@@ -47,8 +48,7 @@ class SpeechGate:
             return False
 
         # 変動は十分。cooldown 未経過なら黙る (基準は維持)
-        if self._last_spoken is not None and \
-                (self._clock() - self._last_spoken) < self.min_interval:
+        if self._last_spoken is not None and (self._clock() - self._last_spoken) < self.min_interval:
             return False
 
         return self._speak(score)

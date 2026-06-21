@@ -1,5 +1,6 @@
-import os, unittest
-from companion_core.llm import make_client_from_env, OpenAIClient, ENV_BASE, ENV_MODEL, ENV_KEY
+import unittest
+
+from companion_core.llm import ENV_BASE, ENV_KEY, ENV_MODEL, OpenAIClient, make_client_from_env
 
 
 class TestClientFromEnv(unittest.TestCase):

@@ -1,4 +1,5 @@
 import unittest
+
 from companion_core.comment import comment
 
 
@@ -39,7 +40,7 @@ class TestComment(unittest.TestCase):
     def test_ng_not_in_output(self):
         out = comment(REQ, FakeHandler(), client=FakeClient("死ねなのだ"), ngwords=["死ね"])
         self.assertNotIn("死ね", out)
-        self.assertIn("Battery", out)   # fallback=handler.template に Battery
+        self.assertIn("Battery", out)  # fallback=handler.template に Battery
 
 
 class RoleHandler:
@@ -64,6 +65,7 @@ class RecordingClient:
 class TestCommentPersona(unittest.TestCase):
     def test_comment_passes_persona_to_prompt(self):
         from companion_core.persona import Persona
+
         c = RecordingClient()
         p = Persona(name="t", voice="VOICE-Z", fewshot="")
         comment({"kind": "x", "payload": {}}, RoleHandler(), client=c, persona=p)

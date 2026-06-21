@@ -36,6 +36,7 @@ class TestMakeClientFromConfig(unittest.TestCase):
 
     def test_returns_client_when_configured(self):
         from companion_core.llm import OpenAIClient
+
         cfg = {"llm": {"base_url": "http://localhost", "model": "gpt-4", "api_key": ""}}
         client = make_client_from_config(cfg)
         self.assertIsInstance(client, OpenAIClient)
