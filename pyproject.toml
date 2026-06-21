@@ -3,7 +3,7 @@ name = "streaming-companion-core"
 version = "0.10.0"
 description = "汎用実況コンパニオン基盤 (ゲーム非依存)"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 license = { text = "MIT" }
 authors = [{ name = "Akiyuki Takahashi" }]
 dependencies = []
@@ -36,7 +36,7 @@ packages = ["src/companion_core"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py314"
 exclude = [
     ".git",
     ".venv",
@@ -63,7 +63,7 @@ known-first-party = ["src"]
 combine-as-imports = true
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
