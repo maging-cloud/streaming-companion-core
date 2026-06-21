@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv run --extra save pytest --cov=companion_core --cov-report=term-missing
+      - run: uv run --extra save pytest --cov=companion_core --cov-report=term-missing --cov-fail-under=90
       - name: Coverage summary
         if: always()
         run: uv run coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
