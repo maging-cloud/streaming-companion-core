@@ -1,5 +1,6 @@
 import unittest
-from companion_core.sources.twitch import parse_irc_line, TwitchChatSource
+
+from companion_core.sources.twitch import TwitchChatSource, parse_irc_line
 
 
 class TestParseIrcLine(unittest.TestCase):

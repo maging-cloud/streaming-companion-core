@@ -1,4 +1,5 @@
 import unittest
+
 from companion_core.phrasebook import pick, pick_index
 
 
@@ -12,7 +13,7 @@ class TestPickIndex(unittest.TestCase):
 
     def test_different_seeds_can_differ(self):
         idxs = {pick_index(s, 8) for s in ["a", "b", "c", "d", "e", "f", "g", "h"]}
-        self.assertGreater(len(idxs), 1)   # 全部同じにはならない
+        self.assertGreater(len(idxs), 1)  # 全部同じにはならない
 
     def test_n_one_always_zero(self):
         self.assertEqual(pick_index("anything", 1), 0)

@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+
 from companion_core.sinks.file import file_sink
 
 

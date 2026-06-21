@@ -4,6 +4,7 @@ import unittest
 
 try:
     import tomli_w  # noqa: F401
+
     HAS_TOMLI_W = True
 except ImportError:
     HAS_TOMLI_W = False

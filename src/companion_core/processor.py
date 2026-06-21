@@ -3,13 +3,13 @@
 
 NG は利用側 (comment.py) が必ずチェーン末尾に付与する安全ゲート (ここでは生成のみ提供)。
 """
+
 import re
 
 SAFE_GENERIC = "いい流れなのだ"
 
 _STRIP_CHARS = set("「」『』（）()【】［］[]\"'`" + "“”‘’")
-_EMOJI = re.compile(
-    "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F000-\U0001F0FF✀-➿←-⇿]+")
+_EMOJI = re.compile("[\U0001f300-\U0001faff\U00002600-\U000027bf\U0001f000-\U0001f0ff✀-➿←-⇿]+")
 
 
 def sanitize(text, request=None):

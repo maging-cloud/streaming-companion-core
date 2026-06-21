@@ -1,25 +1,30 @@
 import unittest
 from unittest import mock
+
 from companion_core import registry
 
 
 class _FakeHandler:
     persona = "P"
     fewshot = ""
+
     def build_user(self, payload):
         return ""
+
     def template(self, request):
         return ""
 
 
 class _FakeEP:
     name = "shop"
+
     def load(self):
         return _FakeHandler
 
 
 class _BrokenEP:
     name = "broken"
+
     def load(self):
         raise RuntimeError("boom")
 

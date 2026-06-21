@@ -5,9 +5,10 @@
 Processor チェーン = (processors or [sanitize]) + [make_ng_filter(ngwords, handler.template)]。
 NG を必ず末尾に付与し出力に NG が残らないことを保証する安全ゲート。
 """
-from .prompt import build_prompt
-from .processor import sanitize, make_ng_filter, run_pipeline
+
 from .persona import ZUNDAMON
+from .processor import make_ng_filter, run_pipeline, sanitize
+from .prompt import build_prompt
 
 
 def comment(request, handler, client=None, processors=None, ngwords=None, persona=None):
@@ -23,5 +24,5 @@ def comment(request, handler, client=None, processors=None, ngwords=None, person
     else:
         text = handler.template(request)
     procs = list(processors) if processors is not None else [sanitize]
-    procs = procs + [make_ng_filter(ngwords or [], handler.template)]   # NG を末尾に常時付与
+    procs = procs + [make_ng_filter(ngwords or [], handler.template)]  # NG を末尾に常時付与
     return run_pipeline(text, request, procs)

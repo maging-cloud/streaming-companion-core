@@ -16,6 +16,7 @@ TTS 合成 (synth) と音声再生 (player) は generic なので **core が con
 
 本パッケージは provider を import しない (entry-point 文字列で discover、一方向依存)。
 """
+
 import importlib.metadata
 
 _GROUP = "companion_core.console_providers"
@@ -23,15 +24,16 @@ _GROUP = "companion_core.console_providers"
 
 def _default_synth(config):
     """config の [voicevox] から VOICEVOX 合成関数を作る (core 既定)。"""
-    from .sinks.voicevox import VoicevoxSink, DEFAULT_BASE_URL
+    from .sinks.voicevox import DEFAULT_BASE_URL, VoicevoxSink
+
     vv = config.get("voicevox", {})
-    return VoicevoxSink(speaker=vv.get("speaker", 1),
-                        base_url=vv.get("base_url", DEFAULT_BASE_URL)).synthesize
+    return VoicevoxSink(speaker=vv.get("speaker", 1), base_url=vv.get("base_url", DEFAULT_BASE_URL)).synthesize
 
 
 def _default_player(config):
     """OS 既定デバイスへ再生する player を作る (core 既定)。"""
     from .console.playback import make_player
+
     return make_player()
 
 
@@ -46,8 +48,9 @@ def discover_console_providers():
     return providers
 
 
-def build_service(provider, config, *, console_state=None, service_cls=None,
-                  supervisor_cls=None, make_synth=None, make_player=None):
+def build_service(
+    provider, config, *, console_state=None, service_cls=None, supervisor_cls=None, make_synth=None, make_player=None
+):
     """provider と config から ConsoleService を組み立てる。
 
     synth/player は core が config から既定構築する (provider が同名メソッドを持てば override)。
@@ -61,6 +64,7 @@ def build_service(provider, config, *, console_state=None, service_cls=None,
         from .supervisor import Supervisor as supervisor_cls
     if console_state is None:
         from .console.state import ConsoleState
+
         console_state = ConsoleState()
     make_synth = make_synth or _default_synth
     make_player = make_player or _default_player

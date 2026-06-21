@@ -2,30 +2,38 @@ import os
 import tempfile
 import unittest
 
-from companion_core.supervisor import Supervisor, Worker
-from companion_core.console.state import ConsoleState
 from companion_core.console.service import ConsoleService
+from companion_core.console.state import ConsoleState
+from companion_core.supervisor import Supervisor, Worker
 
 try:
     import tomli_w  # noqa: F401
+
     HAS_TOMLI_W = True
 except ImportError:
     HAS_TOMLI_W = False
 
 
 class _Noop:
-    def start(self): pass
-    def join(self, timeout=None): pass
-    def is_alive(self): return True
+    def start(self):
+        pass
+
+    def join(self, timeout=None):
+        pass
+
+    def is_alive(self):
+        return True
 
 
 def _service(synth=None, player=None, config_path=None, clock=None):
-    sup = Supervisor([Worker("a", lambda: None, 0.0)],
-                     spawn=lambda target, name, daemon: _Noop(),
-                     sleeper=lambda s: None, max_ticks=0)
+    sup = Supervisor(
+        [Worker("a", lambda: None, 0.0)],
+        spawn=lambda target, name, daemon: _Noop(),
+        sleeper=lambda s: None,
+        max_ticks=0,
+    )
     state = ConsoleState()
-    return ConsoleService(sup, state, synth=synth, player=player,
-                          config_path=config_path, clock=clock or (lambda: 1.0))
+    return ConsoleService(sup, state, synth=synth, player=player, config_path=config_path, clock=clock or (lambda: 1.0))
 
 
 class TestConsoleService(unittest.TestCase):
@@ -49,6 +57,7 @@ class TestConsoleService(unittest.TestCase):
     def test_synth_failure_still_records_text(self):
         def boom(t):
             raise RuntimeError("voicevox down")
+
         svc = _service(synth=boom, player=lambda w: None)
         svc.ingest("text-anyway")
         self.assertEqual(svc.get_state()["current"]["text"], "text-anyway")

@@ -1,6 +1,10 @@
 import unittest
+
 from companion_core.sources.chat import (
-    make_chat_message, from_chat, ChatRouter, keyword_matcher,
+    ChatRouter,
+    from_chat,
+    keyword_matcher,
+    make_chat_message,
 )
 
 
@@ -44,17 +48,23 @@ class TestChatRouter(unittest.TestCase):
         self.assertEqual(r.route({"text": "hi"}), "chat")
 
     def test_first_matching_rule_wins(self):
-        r = ChatRouter(rules=[
-            (keyword_matcher(["買", "build"]), "chat_game"),
-        ], default_kind="chat")
+        r = ChatRouter(
+            rules=[
+                (keyword_matcher(["買", "build"]), "chat_game"),
+            ],
+            default_kind="chat",
+        )
         self.assertEqual(r.route({"text": "何を買う?"}), "chat_game")
         self.assertEqual(r.route({"text": "おやつ食べた"}), "chat")
 
     def test_rules_evaluated_in_order(self):
-        r = ChatRouter(rules=[
-            (lambda m: "urgent" in m["text"], "chat_urgent"),
-            (keyword_matcher(["build"]), "chat_game"),
-        ], default_kind="chat")
+        r = ChatRouter(
+            rules=[
+                (lambda m: "urgent" in m["text"], "chat_urgent"),
+                (keyword_matcher(["build"]), "chat_game"),
+            ],
+            default_kind="chat",
+        )
         # 両方該当でも先勝ち
         self.assertEqual(r.route({"text": "urgent build question"}), "chat_urgent")
 

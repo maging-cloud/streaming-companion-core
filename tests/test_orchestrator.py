@@ -1,4 +1,5 @@
 import unittest
+
 from companion_core.orchestrator import SpeechGate
 
 

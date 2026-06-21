@@ -1,4 +1,5 @@
 """console の live 状態。発話/状態の単一の持ち主。SSE 用に変化を購読者へ push する。"""
+
 import queue
 import threading
 
@@ -10,10 +11,10 @@ class ConsoleState:
         self._running = False
         self._muted = False
         self._workers = []
-        self._current = None       # {"text","ts"} | None
-        self._history = []         # 新しい順
-        self._subs = set()         # set[queue.Queue]
-        self.last_wav = None       # 直近合成 WAV bytes (replay 用)
+        self._current = None  # {"text","ts"} | None
+        self._history = []  # 新しい順
+        self._subs = set()  # set[queue.Queue]
+        self.last_wav = None  # 直近合成 WAV bytes (replay 用)
 
     # ---- mutators ----
     def set_running(self, v):
@@ -36,7 +37,7 @@ class ConsoleState:
         with self._lock:
             self._current = item
             self._history.insert(0, item)
-            del self._history[self._history_limit:]
+            del self._history[self._history_limit :]
         self._notify()
 
     @property

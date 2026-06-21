@@ -4,6 +4,7 @@
 デバイス選択は OS 既定にルーティングする前提 (VB-CABLE を既定にする等)。
 アプリ内デバイス選択は将来の optional extra。
 """
+
 import os
 import subprocess
 import sys

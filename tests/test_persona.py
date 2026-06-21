@@ -1,5 +1,6 @@
 import unittest
-from companion_core.persona import Persona, ZUNDAMON, persona_from_config
+
+from companion_core.persona import ZUNDAMON, Persona, persona_from_config
 
 
 class TestPersona(unittest.TestCase):

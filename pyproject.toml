@@ -19,6 +19,7 @@ dev = [
     "pytest-cov==7.1.0",
     "ruff==0.15.18",
     "mypy==2.1.0",
+    "pre-commit>=4.6.0",
 ]
 
 [tool.pytest.ini_options]
@@ -32,3 +33,38 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/companion_core"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    "alembic",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "C",      # flake8-comprehensions
+    "B",      # flake8-bugbear
+    "UP",     # pyupgrade
+]
+ignore = ["E501", "C901"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+combine-as-imports = true
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true

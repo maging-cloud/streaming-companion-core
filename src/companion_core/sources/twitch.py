@@ -15,14 +15,14 @@ def parse_irc_line(line):
     if not line:
         return None
     if line.startswith("PING "):
-        return {"type": "ping", "token": line[len("PING "):].lstrip(":")}
+        return {"type": "ping", "token": line[len("PING ") :].lstrip(":")}
     # :nick!user@host PRIVMSG #channel :message
     if line.startswith(":") and " PRIVMSG " in line:
         prefix, rest = line[1:].split(" ", 1)
         user = prefix.split("!", 1)[0]
         # rest = "PRIVMSG #channel :message"
         try:
-            _privmsg, after = rest.split(" ", 1)        # after = "#channel :message"
+            _privmsg, after = rest.split(" ", 1)  # after = "#channel :message"
             channel, text = after.split(" :", 1)
         except ValueError:
             return None
@@ -34,7 +34,7 @@ class TwitchChatSource:
     """注入された行イテレータから privmsg を yield する。PING は PONG 自動応答。"""
 
     def __init__(self, recv_lines, send=None):
-        self._recv = recv_lines               # iterable[str]
+        self._recv = recv_lines  # iterable[str]
         self._send = send or (lambda _s: None)  # callable(str): IRC へ送信
 
     def messages(self):
@@ -68,7 +68,6 @@ def open_twitch_irc(token, nick, channel, host="irc.chat.twitch.tv", port=6667):
     send(f"JOIN {channel}")
 
     def recv_lines():
-        for line in sock_file:
-            yield line
+        yield from sock_file
 
     return recv_lines(), send

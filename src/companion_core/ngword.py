@@ -4,6 +4,7 @@
 リスト = 呼び出し側が渡すパス列をマージ。汎用 seed は同梱 ngwords.txt。
 CLI `--list` で現在の NGワードを列挙。
 """
+
 import os
 
 
@@ -33,6 +34,7 @@ def contains_ng(text, ngwords):
 
 def default_paths():
     import importlib.resources
+
     seed = importlib.resources.files("companion_core") / "ngwords.txt"
     user = os.path.expanduser("~/.streaming-companion/ngwords_user.txt")
     return [str(seed), user]
@@ -40,6 +42,7 @@ def default_paths():
 
 def _main():
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--list", action="store_true", help="現在の NGワードを列挙")
     a = ap.parse_args()

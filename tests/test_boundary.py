@@ -1,12 +1,18 @@
 import os
 import unittest
 
-PKG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                       "src", "companion_core")
+PKG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "companion_core")
 # companion_core が import してはいけない外部 (BPB 固有) シンボル
-FORBIDDEN = ("commenter", "scorer", "evaluator", "tools",
-             "llm_match", "shop_handler", "recommendation",
-             "companion_settings")
+FORBIDDEN = (
+    "commenter",
+    "scorer",
+    "evaluator",
+    "tools",
+    "llm_match",
+    "shop_handler",
+    "recommendation",
+    "companion_settings",
+)
 
 
 class TestCoreBoundary(unittest.TestCase):

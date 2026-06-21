@@ -1,5 +1,6 @@
 import unittest
-from companion_core.processor import sanitize, make_ng_filter, run_pipeline, SAFE_GENERIC
+
+from companion_core.processor import SAFE_GENERIC, make_ng_filter, run_pipeline, sanitize
 
 
 class TestSanitize(unittest.TestCase):
@@ -21,17 +22,21 @@ class TestNgFilter(unittest.TestCase):
 
     def test_ng_replaced_with_fallback(self):
         f = make_ng_filter(["死ね"], lambda req: "安全なのだ")
-        self.assertEqual(f("死ねなのだ", {}), "安全なのだ")     # NG → fallback
+        self.assertEqual(f("死ねなのだ", {}), "安全なのだ")  # NG → fallback
 
     def test_fallback_also_ng_uses_safe_generic(self):
-        f = make_ng_filter(["あ"], lambda req: "あ語なのだ")    # fallback も NG 含む
+        f = make_ng_filter(["あ"], lambda req: "あ語なのだ")  # fallback も NG 含む
         self.assertEqual(f("あ", {}), SAFE_GENERIC)
 
 
 class TestRunPipeline(unittest.TestCase):
     def test_applies_in_order(self):
-        p1 = lambda t, r: t + "1"
-        p2 = lambda t, r: t + "2"
+        def p1(t, r):
+            return t + "1"
+
+        def p2(t, r):
+            return t + "2"
+
         self.assertEqual(run_pipeline("x", {}, [p1, p2]), "x12")
 
 
