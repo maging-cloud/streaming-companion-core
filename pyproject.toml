@@ -21,6 +21,9 @@ dev = [
     "mypy==2.1.0",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 # UI (PySide6 console) は別 repo streaming-companion-console へ分離。core は純 lib。
 
 [build-system]
