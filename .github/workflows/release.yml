@@ -1,0 +1,26 @@
+name: release
+# タグ (v*) push で wheel + sdist を build し、GitHub Release にアセットとして添付する。
+# これにより consumer は git ソースからの build なしに成果物を取得でき、provenance も残る。
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write          # Release 作成・アセット添付に必要
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: build wheel + sdist
+        run: uv build
+      - name: verify wheel contents
+        run: python3 scripts/check_wheel.py
+      - name: create release with assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # 既存 Release があればアセットを上書き添付 (idempotent)
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --title "${GITHUB_REF_NAME}" --generate-notes \
+          || gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
