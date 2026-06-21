@@ -16,8 +16,8 @@ import zipfile
 
 REQUIRED = [
     "companion_core/console_providers.py",
-    "companion_settings/window.py",
-    "companion_settings/live_panel.py",
+    "companion_core/console/service.py",
+    "companion_core/supervisor.py",
 ]
 
 

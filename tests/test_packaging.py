@@ -1,18 +1,10 @@
-"""packaging ガード: 統合 console の主要モジュールが import 可能なこと。
+"""packaging ガード: core lib の主要モジュールが import 可能なこと。
 
 wheel への同梱検証は CI の build ジョブ (scripts/check_wheel.py) が担う。本テストは
 source 側で主要モジュールが import できること (移動・削除での欠落) を保証する。
+UI (PySide6 console) は別 repo streaming-companion-console へ分離済み。
 """
-import os
 import unittest
-
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-try:
-    import PySide6  # noqa: F401
-    HAS_PYSIDE6 = True
-except ImportError:
-    HAS_PYSIDE6 = False
 
 
 class TestPackaging(unittest.TestCase):
@@ -21,12 +13,10 @@ class TestPackaging(unittest.TestCase):
         self.assertTrue(hasattr(cp, "discover_console_providers"))
         self.assertTrue(hasattr(cp, "build_service"))
 
-    @unittest.skipUnless(HAS_PYSIDE6, "PySide6 未インストール")
-    def test_settings_ui_importable(self):
-        import companion_settings.window as w
-        import companion_settings.live_panel as lp
-        self.assertTrue(hasattr(w, "MainWindow"))
-        self.assertTrue(hasattr(lp, "LivePanel"))
+    def test_core_console_logic_importable(self):
+        from companion_core.console.service import ConsoleService  # noqa: F401
+        from companion_core.console.state import ConsoleState  # noqa: F401
+        from companion_core.supervisor import Supervisor  # noqa: F401
 
 
 if __name__ == "__main__":

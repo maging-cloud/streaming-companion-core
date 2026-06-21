@@ -23,7 +23,7 @@ uv pip install -e .              # 開発
 - comment.py: comment(request, handler, client, processors, ngwords) — NG を末尾常時付与する安全ゲート。
 - orchestrator.py: SpeechGate — 発話タイミング制御 (スコア変動 + クールダウン + 重要イベント)。
 - supervisor.py: Worker/worker_loop/Supervisor — 汎用 worker lifecycle (tick を thread で並行起動、協調停止)。
-- console/: Operator Console の UI 非依存ロジック — ConsoleState (live 状態+購読) / ConsoleService (制御+TTS所有) / playback (WAV 再生)。UI (PySide6) は companion_settings 側 (下記)。
+- console/: Operator Console の UI 非依存ロジック — ConsoleState (live 状態+購読) / ConsoleService (制御+TTS所有) / playback (WAV 再生)。UI (PySide6) は別 repo [streaming-companion-console](https://github.com/maging-cloud/streaming-companion-console) (下記)。
 - console_providers.py: console provider の discover (entry-point `companion_core.console_providers`) + build_service (worker/TTS 組み立て)。consumer が worker 群を plugin として注入する。
 - chat_handler.py: ChatHandler (汎用基底, persona 注入式) + ZundamonChatHandler (既定 persona ずんだもん, ゲーム非依存)。
 - sources/chat.py: from_chat (chat→CommentRequest) + ChatRouter (kind 振り分け) + keyword_matcher。
@@ -32,35 +32,25 @@ uv pip install -e .              # 開発
 
 設計の詳細・データフロー・plugin の作り方は [ARCHITECTURE.md](ARCHITECTURE.md) を参照。
 
-## Operator Console (統合 PySide6)
+## Operator Console (別 repo)
 
-配信中の live 制御 (start/stop/mute/replay) と設定編集 (LLM/NGword/プラグイン) を行う
-**単一の PySide6 アプリ**。UI 非依存の制御ロジック (`ConsoleService`/`ConsoleState`/`Supervisor`/
-playback) は `companion_core`、Qt UI (MainWindow + LivePanel) は `companion_settings`。
+統合 PySide6 console UI は別の公開 repo
+[**streaming-companion-console**](https://github.com/maging-cloud/streaming-companion-console)
+(`companion_console`) にある。core はその UI 非依存ロジック (`ConsoleState`/`ConsoleService`/
+`Supervisor`/playback) と provider discover を提供する純 lib。console は core を依存し、
+plugin (provider / settings panel) を entry-point で discover する (core/console は plugin を import しない)。
 
-```
-uv pip install -e ".[ui]"
-companion-console            # 統合ウィンドウ (companion_settings.__main__:main)
-```
-
-- 起動時に `companion_core.console_providers` entry-point を discover し、provider があれば
-  `ConsoleService` を組み立てて「ライブ」タブを表示する。provider が無ければ設定タブのみ。
-- タブ: ライブ / LLM設定 / **TTS設定 (VOICEVOX: speaker・base_url)** / NGワード / プラグイン。
-  TTS設定は編集で起動中 console へ **live 反映** (synth 差し替え、再起動不要)、保存で
-  `config.toml [voicevox]` に永続化、破棄で直近保存値に戻す。
-- ライブ更新は `ConsoleState.subscribe()` の queue を別スレッドで drain → Qt signal で描画。
-- TTS 合成・再生は `ConsoleService` が所有。音声再生は OS 既定デバイス経由
-  (stdlib: winsound/afplay/aplay)。VB-CABLE 等を既定にすると配信へ流せる。
-
-consumer (BPB 等) は worker 群・TTS を **console provider plugin** として登録する:
+consumer (BPB 等) は worker 群を **console provider plugin** として登録する:
 ```
 [project.entry-points."companion_core.console_providers"]
-bpb = "commenter.console_provider:BpbConsoleProvider"
+bpb = "yourpkg.console_provider:YourConsoleProvider"
 ```
 provider 契約: `build_workers(ingest, config) -> [Worker]`（必須）。TTS 合成/再生は core が
 config (`[voicevox]`) から既定構築する（provider の `synth`/`player` は任意 override、通常不要）。
+console 向け設定パネルは entry-point group `companion_core.settings` に宣言的 (JSON Schema) /
+Qt Designer `.ui` で登録でき、plugin は UI (PySide6) を持たずに済む。
 
-設計: [docs/superpowers/specs/2026-06-21-unified-pyside6-console-design.md](docs/superpowers/specs/2026-06-21-unified-pyside6-console-design.md)
+設計: [docs/superpowers/specs/2026-06-21-console-repo-split-design.md](docs/superpowers/specs/2026-06-21-console-repo-split-design.md)
 
 ## plugin 規約 (handler, duck typing)
 persona: str / fewshot: str (空可) / build_user(payload) -> str / template(request) -> str
