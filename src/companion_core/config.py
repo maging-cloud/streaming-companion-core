@@ -23,3 +23,12 @@ def make_client_from_config(cfg):
     if base and model:
         return OpenAIClient(base, llm.get("api_key", ""), model)
     return None
+
+
+def save_config(cfg, path=None):
+    """cfg を config.toml に書き出す。tomli-w が要る (optional extra `console`/`ui`)。"""
+    import tomli_w
+    p = Path(path) if path is not None else DEFAULT_PATH
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(p, "wb") as f:
+        tomli_w.dump(cfg, f)
