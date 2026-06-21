@@ -189,6 +189,19 @@ def main():
 
 ---
 
+## 追補 (v0.9.1): TTS 設定タブ
+
+synth/player を core 既定構築にした以上、TTS 設定 (`[voicevox]`) も core が読む関心。GUI が
+無いと config.toml 手編集になるため、**built-in の TTS 設定パネル**を統合 console に追加する
+（TTS は generic なので BPB plugin ではなく built-in、LLM パネルと同じ作り）。
+
+- `companion_settings/panels/voicevox.py` `VoicevoxPanel`: speaker / base_url。
+- **反映モデル**: 編集 (commit) → 起動中 console に **live 反映**（`MainWindow._apply_voicevox` が
+  `_default_synth({"voicevox": new})` で `ConsoleService.synth` を差し替え、再起動不要）。
+  **保存** → config.toml `[voicevox]` を load-merge-save で永続化（他セクション保持）。
+  **破棄** → 直近保存値にフィールドを戻し live も戻す。
+- `console_service` が無い（設定のみ起動）なら apply は no-op、保存のみ効く。
+
 ## スコープ外（YAGNI）
 
 - provider 固有のリッチ live ビュー（shop offers/round/gold 表示）。MVP は generic な now-speaking/history。
