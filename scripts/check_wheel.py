@@ -19,6 +19,7 @@ REQUIRED = [
     "companion_core/console_providers.py",
     "companion_core/console/service.py",
     "companion_core/supervisor.py",
+    "companion_core/py.typed",  # PEP 561: consumer の mypy が core の型を使うために必須
 ]
 
 
