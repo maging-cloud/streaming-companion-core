@@ -7,8 +7,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv run --extra save pytest --cov=companion_core --cov-report=term-missing --cov-fail-under=90
       - name: Coverage summary
         if: always()
@@ -19,11 +19,11 @@ jobs:
     # editable install では露見しない packaging 不具合 (build 失敗 / モジュール欠落) を捕捉。
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"   # wheel は requires-python >=3.14。venv を 3.14 で作る
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - name: build wheel
         run: uv build --wheel
       - name: verify wheel contents
