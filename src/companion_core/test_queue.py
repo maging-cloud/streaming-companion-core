@@ -66,3 +66,10 @@ def test_len_and_empty_get() -> None:
     q = EventQueue()
     assert len(q) == 0
     assert q.get() is None
+
+
+def test_public_exports() -> None:
+    import companion_core
+
+    assert hasattr(companion_core, "EventQueue")
+    assert hasattr(companion_core, "make_pump_worker")
